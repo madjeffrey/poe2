@@ -7,13 +7,13 @@ import time
 
 if __name__ == "__main__":
     # rules for main
-    delay = 0.1
-    printGame = True
+    delay = 0
+    printGame = False
     
     # set rules for the game
-    rows = 5
-    cols = 5
-    cutoff = 15
+    rows = 10
+    cols = 10
+    cutoff = 0
     handicap = 0.5
 
     # initialize the game

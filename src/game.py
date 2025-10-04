@@ -39,7 +39,7 @@ class Game:
         # Current time
         now = datetime.now()
         # Format: YYYY-MM-DD HH:MM:SS.mmm
-        self.__id = now.strftime("%Y_%m_%d_%H_%M_%S_") + f"{int(now.microsecond/1000):08d}"
+        self.__id = now.strftime("%Y_%m_%d_%H_%M_%S_") + f"{int(now.microsecond/1000):08d}" 
         # Game state  
         # all caps = const
         self.__NUMCOLS = int(numCols)
@@ -398,7 +398,7 @@ class Game:
                     file.truncate()
             
 
-            with open(("../statistics/games/"+self.__id), "w") as file:
+            with open(("../statistics/games/"+self.__id+".json"), "w") as file:
                 if self.__won == 1:
                     winner = __p1Class
                 elif self.__won == 2:
@@ -407,7 +407,7 @@ class Game:
                     assert self.__won != 0, "game is over but no winner"
                 init = self.getInit()
                 moveHistory = self.getMoveHistory()
-                __gameStats = {"id": self.getId(), "p1": __p1Class, "class2": __p2Class, "winner": self.getWinner(), "winnerType": winner, "numberMoves": moveHistory[1], "moveHistor": moveHistory[0], "scores":self.getPlayerScores(), "finalBoard": self.getBoard(), "initialGame": {"numRows":  init[0], "numCols":  init[1], "handicap": init[2], "scoreCutoff": init[3]}}
+                __gameStats = {"id": self.getId(), "class1": __p1Class, "class2": __p2Class, "winner": self.getWinner(), "winnerType": winner, "numberMoves": moveHistory[1], "moveHistory": moveHistory[0], "scores":self.getPlayerScores(), "finalBoard": self.getBoard(), "initialGame": {"numRows":  init[0], "numCols":  init[1], "scoreCutoff": init[2], "handicap": init[3]}}
                 file.seek(0)
                 self.__dump_dicts_with_flat_lists(__gameStats, file)
                 file.truncate()
