@@ -1,10 +1,23 @@
+from datetime import datetime
+from player import Player
+import os
+import json
 import sys
 
 
 """
 todo:
-[] test my game to find the bug with my score calculation
+[x] make w+ into r+ by checking first if the file exists or not
+[] get current working directory to calculate path to store the statistics as for now must be run in src
+[] edit id so that it is only : separated numbers
 
+tasks:
+[] test my game to find the bug with my score calculation
+[] update calc score so that it is more efficient using my algorithm
+
+
+maybe:
+[] make it so that the description of the player is shown in the game logs and player logs
 """
 
 class Game:
@@ -20,21 +33,26 @@ class Game:
     undo: allows to roll back the game state
     """    
     ## does python always pass by reference?
-    def __init__(self, numRows:int, numCols:int, scoreCutoff:float, handicap:float):
+    def __init__(self, numRows:int, numCols:int, scoreCutoff:float, handicap:float, p1Path:str, p2Path:str):
+        # generate id based on time of initializaiton
+        # Current time
+        now = datetime.now()
+        # Format: YYYY-MM-DD HH:MM:SS.mmm
+        self.__id = now.strftime("%Y_%m_%d_%H_%M_%S_") + f"{int(now.microsecond/1000):08d}"
         # Game state  
         # all caps = const
+        self.__id = "".join(c for c in self.__id if c.isdigit())
         self.__NUMCOLS = int(numCols)
         self.__NUMROWS = int(numRows)
         self.__SCORECUTOFF = float(scoreCutoff)
         self.__NUMTILES = self.__NUMCOLS * self.__NUMROWS
         self.__HANDICAP = float(handicap)
-
         self.__won = 0
         self.__numMoves = 0
         self.__moveHistory = [] #((row:int,col:int),(p1score:float, p2score:float), cur__player:int, winner:int)
         self.__currentPlayer = 0 # 0 __player 1 or 1 __player 2
-        self.__player1Score = int(0)
-        self.__player2Score = float(handicap)
+        self.__p1Score = int(0)
+        self.__p2Score = float(handicap)
 
         # needed for my efficient implementation of __calcScore
         # self.matrixLines = [[[0 for _ in range(4)] for _ in range(self.__NUMCOLS)] for _ in range(self.__NUMROWS)] #[/, \, |, -]
@@ -45,18 +63,32 @@ class Game:
         for _ in range(self.__NUMROWS):
             self.__board.append([0]*self.__NUMCOLS)
 
+        # store the players
+        self.__p1ClassPath = p1Path
+        self.__p2ClassPath = p2Path
+        # do we want to store the data for mirror matches
+        self.ignoreMirrorMatch = True
+        self.showStatistics = True
+
     def __str__(self):
         '''
             show the board
         '''
+        output = str()
         for row in self.__board:
-            print(" ".join(["_" if v == 0 else str(v) for v in row]))
-            print(f"\n__player 1 has score {self.__player1Score}: \n__player 2 has score: {self.__player2Score}")
-            if self.__won != 0:
-                print(f"game over: winner is {self.__won}")
+            output += " ".join(["_" if v == 0 else str(v) for v in row]) + "\n"
+        output += f"\nplayer 1 has score: {self.__p1Score} \nplayer 2 has score: {self.__p2Score}"
+        if self.__won != 0:
+            output += "\n" + f"***game over: winner is {self.__won}***"
+        
+        return output + "\n__________________________________\n"
 
-        return True
-    
+    def getId(self) -> str:
+        """
+        returns the id for a given game
+        """
+        return self.__id
+
     # getters since we do not want any setters as the board should only be manipulated through the play function
     def getBoard(self) -> list:
         """
@@ -72,8 +104,14 @@ class Game:
         2: player 2 won
         0: no winnner yet
         """
-        self.__gameOver()
+        self.gameOver()
         return self.__won
+    
+    def getInit(self)->tuple:
+        """
+        returns (numRows, numCols, scoreCutoff, Handicap)
+        """
+        return (self.__NUMROWS, self.__NUMCOLS, self.__SCORECUTOFF, self.__HANDICAP)
     
     def getMoveHistory(self) -> tuple:
         """
@@ -91,9 +129,14 @@ class Game:
         return: (player1Score, Player2Score)
         """
         self.__calcScore()
-        return (self.__player1Score, self.__player2Score)
+        return (self.__p1Score, self.__p2Score)
 
     def getCurrentPlayer(self):
+        """
+        return: the current player 
+        0 = player 1 
+        1 = player 2
+        """
         return self.__currentPlayer
 
     def getPossibleMoves(self) -> list:
@@ -117,7 +160,7 @@ class Game:
         return:
         -1 if illegal move
         1 if move successful 
-        2 if winner is had
+        2 if there is a winner
         '''
         if not self.isLegal(row, col):
             return -1
@@ -135,15 +178,15 @@ class Game:
             self.__currentPlayer = 1
     
         # calculate the score through all the four possible directions of lines
-        self.__calcScore(row,col)
+        self.__calcScore() # does not currently need arguments
 
         # keep trach of the number of moves played
         self.__numMoves += 1 
 
-        self.__gameOver()
+        self.gameOver()
 
         # add the move history to the list for undo
-        self.__moveHistory.append(((row,col),(self.__player1Score, self.__player2Score), self.__currentPlayer, self.__won))
+        self.__moveHistory.append(((row,col),(self.__p1Score, self.__p2Score), self.__currentPlayer, self.__won))
 
         return 1
 
@@ -159,8 +202,35 @@ class Game:
         
         return False
 
+    def undo(self, args):
+        '''
+        >> undo
+        Undoes the last move.
+        return:
+        True if undo was successful
+        False if no moves to undo
+        '''
+        if not self.__moveHistory:
+            return False
+        
+        status = self.__moveHistory.pop()
+        self.__numMoves -= 1
+        self.__board[status[0][0]][status[0][1]] = 0
+        if self.__moveHistory:
+            newState = self.__moveHistory[-1]
+            self.__p1Score = newState[1][0]
+            self.__p2Score = newState[1][1]
+            self.__currentPlayer = newState[2]
+            self.__won = newState[3]
+        else:
+            self.__numMoves = 0
+            self.__p1Score = 0
+            self.__p2Score = self.HANDICAP
+            self.__currentPlayer = 1
+            self.__won = 0
+        return True
 
-    def __gameOver(self)-> bool:
+    def gameOver(self)-> bool:
         """
         Updates the winner if there is one
 
@@ -168,14 +238,14 @@ class Game:
         True if the game is over
         False if the game is not over
         """
-        if self.__player1Score >= self.__SCORECUTOFF and self.__SCORECUTOFF != 0:
+        if self.__p1Score >= self.__SCORECUTOFF and self.__SCORECUTOFF != 0:
             self.__won = 1
             return True
-        elif self.__player2Score >= self.__SCORECUTOFF and self.__SCORECUTOFF != 0:
+        elif self.__p2Score >= self.__SCORECUTOFF and self.__SCORECUTOFF != 0:
             self.__won = 2
             return True
         elif self.__numMoves == self.__NUMTILES:
-            if self.__player1Score > self.__player2Score:
+            if self.__p1Score > self.__p2Score:
                 self.__won = 1
             else:
                 self.__won = 2 
@@ -188,8 +258,8 @@ class Game:
 
     # want to eventually switch to my score calculation
     def __calcScore(self):
-        p1_score = 0
-        p2_score = self.__HANDICAP
+        self.__p1Score = 0
+        self.__p2Score = self.__HANDICAP
 
         # Progress from left-to-right, top-to-bottom
         # We define lines to start at the topmost (and for horizontal lines leftmost) point of that line
@@ -244,24 +314,134 @@ class Game:
                     for line_length in [hl, vl, dl, al]:
                         if line_length > 1:
                             if c == 1:
-                                p1_score += 2 ** (line_length-1)
+                                self.__p1Score += 2 ** (line_length-1)
                             else:
-                                p2_score += 2 ** (line_length-1)
+                                self.__p2Score += 2 ** (line_length-1)
                     # If all found lines are length 1, check if it is the special case of a lone piece
                     if hl == vl == dl == al == 1 and lone_piece:
                         if c == 1:
-                            p1_score += 1
+                            self.__p1Score += 1
                         else:
-                            p2_score += 1
+                            self.__p2Score += 1
 
 
 
+    def save(self):
+        # save the states of the game if it finished
+        if self.gameOver() and self.showStatistics:
+            # ignore matches where it plays each other since it will always win and lose
+            if self.__p1ClassPath == self.__p2ClassPath and self.ignoreMirrorMatch:
+                return
+            
+            # update stats for player 1
+            __stats = None
+            if self.__p1ClassPath:
+                __p1Class = self.__p1ClassPath.split("/")[-1].removesuffix(".json")
+                # if the file does not exist make the file
+                if not os.path.exists(self.__p1ClassPath):
+                    with open(self.__p1ClassPath, "a") as file:
+                        # check if the file is empty, if so create a new dict
+                        __stats = {"class": __p1Class, "gamesPlayed": 0, "gamesWon": 0, "gamesLost":0, "gamesList":[]}
+                
+                
+                # open the file to read than write 
+                with open(self.__p1ClassPath, "r+") as file:
+                    if not __stats:
+                        __stats = json.load(file)
+                    # update the stats for the game just played
+                    __stats["gamesPlayed"] += 1
+                    __stats["gamesList"].append(self.__id)
+                    if self.__won == 1:
+                        __stats["gamesWon"] += 1
+                    elif self.__won == 2:
+                        __stats["gamesLost"] += 1
+                    else:
+                        __stats["gamesPlayed"] -= 1
+                    
+                    file.seek(0)
+                    self.__dump_dicts_with_flat_lists(__stats, file)
+                    file.truncate()
+            
+
+
+            # update stats for player 2
+            __stats = None
+            if self.__p2ClassPath:
+                # if the file does not exist make the file
+                if not os.path.exists(self.__p2ClassPath):
+                    with open(self.__p2ClassPath, "a") as file:
+                        # check the file if it is empty, if so create new default dict
+                        __stats = {"class": __p2Class, "gamesPlayed": 0, "gamesWon": 0, "gamesLost":0, "gamesList":[]}
+                __p2Class = self.__p2ClassPath.split("/")[-1].removesuffix(".json")
+                
+                
+                # open the file to read than write
+                with open(self.__p2ClassPath, "r+") as file:
+                    if not __stats:
+                        __stats = json.load(file)
+                    # update the stats for the game just played
+                    __stats["gamesPlayed"] += 1
+                    # check if it is a mirror match if so then ignore second addition of game
+                    if not (self.__p1ClassPath == self.__p2ClassPath):
+                        __stats["gamesList"].append(self.__id)
+                    if self.__won == 2:
+                        __stats["gamesWon"] += 1
+                    elif self.__won == 1:
+                        __stats["gamesLost"] += 1
+                    else:
+                        __stats["gamesPlayed"] -= 1
+                    
+                    file.seek(0)
+                    self.__dump_dicts_with_flat_lists(__stats, file)
+                    file.truncate()
+            
+
+            with open(("../statistics/games/"+self.__id), "w") as file:
+                if self.__won == 1:
+                    winner = __p1Class
+                elif self.__won == 2:
+                    winner = __p2Class
+                else:
+                    assert self.__won != 0, "game is over but no winner"
+                init = self.getInit()
+                moveHistory = self.getMoveHistory()
+                __gameStats = {"id": self.getId(), "p1": __p1Class, "class2": __p2Class, "winner": winner, "numberMoves": moveHistory[1], "moveHistor": moveHistory[0], "scores":self.getPlayerScores(), "finalBoard": self.getBoard(), "initialGame": {"numRows":  init[0], "numCols":  init[1], "handicap": init[2], "scoreCutoff": init[3]}}
+                file.seek(0)
+                self.__dump_dicts_with_flat_lists(__gameStats, file)
+                file.truncate()
+
+        else:
+            print("Something went wrong game terminated without being over", file=sys.stderr)
 
 
 
+    def __dump_dicts_with_flat_lists(self, obj, file, indent=4):
+        """
+        Dumps a dictionary to JSON:
+        - Dictionaries are indented
+        - Lists are kept on a single line
+        Works recursively for nested dicts.
+        """
 
+        def __encode(obj, level=0):
+            spacing = " " * (level * indent)
+            if isinstance(obj, dict):
+                items = []
+                for k, v in obj.items():
+                    key = json.dumps(k)
+                    if isinstance(v, dict):
+                        value = "".join(__encode(v, level + 1))
+                    elif isinstance(v, list):
+                        # Keep list on one line
+                        value = json.dumps(v)
+                    else:
+                        value = json.dumps(v)
+                    items.append(f"{spacing}{' ' * indent}{key}: {value}")
+                return ["{\n" + ",\n".join(items) + f"\n{spacing}}}"]
+            else:
+                return [json.dumps(obj)]
 
-
+        file.write("".join(__encode(obj)))
 
 
 
