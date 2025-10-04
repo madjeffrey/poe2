@@ -9,8 +9,8 @@ import sys
 todo:
 [x] make w+ into r+ by checking first if the file exists or not
 [x] edit id so that it is only : separated numbers
-[] get current working directory to calculate path to store the statistics as for now must be run in src
 [] make it so that the players wins and losses are divided by who he beat as well, record against opponent (should be a dict to key in opponent)
+[] get current working directory to calculate path to store the statistics as for now must be run in src
 
 tasks:
 [] test my game to find the bug with my score calculation
@@ -66,9 +66,10 @@ class Game:
         # store the players
         self.__p1ClassPath = p1Path
         self.__p2ClassPath = p2Path
-        # do we want to store the data for mirror matches
+        # recording mariables
         self.ignoreMirrorMatch = True
         self.showStatistics = True
+        self.recordGames = True
 
     def __str__(self):
         '''
@@ -330,91 +331,75 @@ class Game:
         # save the states of the game if it finished
         if self.gameOver() and self.showStatistics:
             # ignore matches where it plays each other since it will always win and lose
-            if self.__p1ClassPath == self.__p2ClassPath and self.ignoreMirrorMatch:
+            mirror = self.__p1ClassPath == self.__p2ClassPath
+            if mirror and self.ignoreMirrorMatch:
+                print("This is a mirror match and we wish to ignore them!")
                 return
             
+            p1 = self.__p1ClassPath.split("/")[-1].removesuffix(".json")
+            p2 = self.__p2ClassPath.split("/")[-1].removesuffix(".json")
             # update stats for player 1
-            __stats = None
-            if self.__p1ClassPath:
-                __p1Class = self.__p1ClassPath.split("/")[-1].removesuffix(".json")
-                # if the file does not exist make the file
-                if not os.path.exists(self.__p1ClassPath):
-                    with open(self.__p1ClassPath, "a") as file:
-                        # check if the file is empty, if so create a new dict
-                        __stats = {"class": __p1Class, "gamesPlayed": 0, "gamesWon": 0, "gamesWonAsP1": 0, "gamesWonAsP2":0, "gamesLost":0, "gamesList":[]}
-                
-                
-                # open the file to read than write 
-                with open(self.__p1ClassPath, "r+") as file:
-                    if not __stats:
-                        __stats = json.load(file)
-                    # update the stats for the game just played
-                    __stats["gamesPlayed"] += 1
-                    __stats["gamesList"].append(self.__id)
-                    if self.__won == 1:
-                        __stats["gamesWon"] += 1
-                        __stats["gamesWonAsP1"] += 1
-                    elif self.__won == 2:
-                        __stats["gamesLost"] += 1
-                    else:
-                        __stats["gamesPlayed"] -= 1
-                    
-                    file.seek(0)
-                    self.__dump_dicts_with_flat_lists(__stats, file)
-                    file.truncate()
-            
-
-
+            self.__recordPlayerStats(self, self.__p1ClassPath, 1, p2)
+        
             # update stats for player 2
-            __stats = None
-            if self.__p2ClassPath:
-                # if the file does not exist make the file
-                if not os.path.exists(self.__p2ClassPath):
-                    with open(self.__p2ClassPath, "a") as file:
-                        # check the file if it is empty, if so create new default dict
-                        __stats = {"class": __p2Class, "gamesPlayed": 0, "gamesWon": 0, "gamesLost":0, "gamesList":[]}
-                __p2Class = self.__p2ClassPath.split("/")[-1].removesuffix(".json")
-                
-                
-                # open the file to read than write
-                with open(self.__p2ClassPath, "r+") as file:
-                    if not __stats:
-                        __stats = json.load(file)
-                    # update the stats for the game just played
-                    __stats["gamesPlayed"] += 1
-                    # check if it is a mirror match if so then ignore second addition of game
-                    if not (self.__p1ClassPath == self.__p2ClassPath):
-                        __stats["gamesList"].append(self.__id)
-                    if self.__won == 2:
-                        __stats["gamesWon"] += 1
-                        __stats["gamesWonAsP2"] += 1
-                    elif self.__won == 1:
-                        __stats["gamesLost"] += 1
-                    else:
-                        __stats["gamesPlayed"] -= 1
-                    
-                    file.seek(0)
-                    self.__dump_dicts_with_flat_lists(__stats, file)
-                    file.truncate()
+            self.__recordPlayerStats(self, self.__p2ClassPath, 2, p1)
             
+            
+            # record the stats of a game
+            if self.recordGames:
+                os.makedirs("../statistics/games/{p1}vs{p2}", exist_ok=True)
+                with open((f"../statistics/games/{p1}vs{p2}/{self.__id}.json"), "w") as file:
+                    __p1Class = self.__p1ClassPath.split("/")[-1].removesuffix(".json")
+                    __p2Class = self.__p2ClassPath.split("/")[-1].removesuffix(".json")
+                    if self.__won == 1:
+                        winner = self.__p1ClassPath.split("/")[-1].removesuffix(".json")
+                    elif self.__won == 2:
+                        winner = self.__p2ClassPath.split("/")[-1].removesuffix(".json")
+                    else:
+                        assert self.__won != 0, "game is over but no winner"    
+                    init = self.getInit()
+                    moveHistory = self.getMoveHistory()
+                    __gameStats = {"id": self.getId(), "class1": __p1Class, "class2": __p2Class, "winner": self.getWinner(), "winnerType": winner, "numberMoves": moveHistory[1], "moveHistory": moveHistory[0], "scores":self.getPlayerScores(), "finalBoard": self.getBoard(), "initialGame": {"numRows":  init[0], "numCols":  init[1], "scoreCutoff": init[2], "handicap": init[3]}}
+                    file.seek(0)
+                    self.__dump_dicts_with_flat_lists(__gameStats, file)
+                    file.truncate()
 
-            with open(("../statistics/games/"+self.__id+".json"), "w") as file:
-                if self.__won == 1:
-                    winner = __p1Class
-                elif self.__won == 2:
-                    winner = __p2Class
+
+    def __recordPlayerStats(self, path:str, playerOrder:int, oppClass:str)-> None:
+        # can be good to keep stats of mirror matches to decide if there is a favouritism to be player 1 or 2
+        __stats = None
+        if path:
+            __pClass = path.split("/")[-1].removesuffix(".json")
+            # if the file does not exist make the file
+            if not os.path.exists(path):
+                with open(path, "a") as file:
+                    # check if the file is empty, if so create a new dict
+                    __stats = {"class": __pClass, "gamesPlayed": 0, "gamesWon": 0, "gamesLost":0, "gamesWonAsP1": 0, "gamesWonAsP2":0, "winning" : {"opponentClass": oppClass, "gamesWon":0, "gamesLost":0, "gamesWonAsP1": 0, "gamesWonAsP2":0, "gamesList":[]}}
+            
+            
+            # open the file to read than write 
+            with open(path, "r+") as file:
+                if not __stats:
+                    __stats = json.load(file)
+                # update the stats for the game just played
+                __stats["gamesPlayed"] += 1
+                __stats["winning"]["opponent"] = oppClass
+                __stats["winning"]["gamesPlayed"] += 1
+                if self.__won == playerOrder:
+                    __stats["gamesWon"] += 1
+                    __stats[f"gamesWonAsP{playerOrder}"] += 1
+                    __stats["winning"]["gamesWon"] += 1
+                    __stats["winning"][f"gamesWonAsP{playerOrder}"] += 1
                 else:
-                    assert self.__won != 0, "game is over but no winner"    
-                init = self.getInit()
-                moveHistory = self.getMoveHistory()
-                __gameStats = {"id": self.getId(), "class1": __p1Class, "class2": __p2Class, "winner": self.getWinner(), "winnerType": winner, "numberMoves": moveHistory[1], "moveHistory": moveHistory[0], "scores":self.getPlayerScores(), "finalBoard": self.getBoard(), "initialGame": {"numRows":  init[0], "numCols":  init[1], "scoreCutoff": init[2], "handicap": init[3]}}
+                    assert self.__won != 0, "there is no winner when there should be"
+                    __stats["gamesLost"] += 1
+                    __stats["winning"]["gamesLost"] += 1
+                
+                __stats["winning"]["gamesList"].append(self.__id)
                 file.seek(0)
-                self.__dump_dicts_with_flat_lists(__gameStats, file)
+                self.__dump_dicts_with_flat_lists(__stats, file)
                 file.truncate()
-
-        else:
-            print("Something went wrong game terminated without being over", file=sys.stderr)
-
+            
 
 
     def __dump_dicts_with_flat_lists(self, obj, file, indent=4):
