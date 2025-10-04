@@ -1,8 +1,69 @@
 from game import Game
-from player import Player
+from Players.player import Player
 from Players.randomPlayer import RandomPlayer
+from Players.clusterPlayer import ClusterPlayer
 import time
 
+
+"""
+Question: 
+[] should the simulation handle the recording of games, or have the game record itself
+todo:
+[x] have setter for mirror match, recordGames, recordStats
+"""
+# made simulation class so that the player is able to know if it is his turn, also improves generalizability
+# also was able to have settings to see if we want iterations or infinite
+# but due to having a new quality to check if it is a new game, the player order does not matter for now
+
+class Simulation:
+    def __init__(self, startBoard:tuple, p1:Player, p2:Player, iterations:int=0, settings:tuple=(False, True, True, True, 0)):
+        """
+        args:
+        startBoard(numRows, numCols, scoreCutoff, handicap)
+        p1 must be an object of subclass of Player
+        p2 must be an object of subclas of Player
+        iterations: 0 -> inf else n interations
+        settings:(printGame, recordStats, recordGames, ignoreMirrorMatch, delay(in seconds))
+        """
+
+        # initialize gameSettings
+        self.__iterations = iterations
+        self.__printGame = settings[0]
+        self.__settings = settings
+        self.__delay = settings[4]
+        self.__p1 = p1
+        self.__p2 = p2
+        self.__startBoard = startBoard
+
+        
+    def run(self):
+        # if iterations = 0 then go for infinity, if iterations does not equal 0 then go until count = iterations
+        count = 0
+        while not self.__iterations or count < self.__iterations:
+            # create a new game of the same type and settings
+            self.__game = Game(self.__startBoard[0], self.__startBoard[1], self.__startBoard[2], self.__startBoard[3], self.__p1.getClassPath(), self.__p2.getClassPath())
+            self.__game.setRecordStats(self.__settings[1])
+            self.__game.setRecordGames(self.__settings[2])
+            self.__game.setIgnoreMirrorMatch(self.__settings[3])
+            # give the players references to the game and set their order since it is a new game
+            self.__p1.setGame(self.__game, 1)
+            self.__p2.setGame(self.__game, 2)
+            while not self.__game.gameOver():
+                if self.__printGame:
+                    print(self.__p1.actionMove(), "p1")
+                    print(self.__game)
+                    time.sleep(self.__delay)
+                    if not self.__game.gameOver():
+                        print(self.__p2.actionMove(), "p2")
+                        print(self.__game)
+                        time.sleep(self.__delay)
+                else:
+                    self.__p1.actionMove()
+                    if not self.__game.gameOver():
+                        self.__p2.actionMove()
+
+            self.__game.save()
+            count += 1
 
 
 if __name__ == "__main__":
@@ -15,28 +76,13 @@ if __name__ == "__main__":
     cols = 10
     cutoff = 0
     handicap = 0.5
+    
+    # initialize the players
+    randPlayer = RandomPlayer()
+    CluPlayer = ClusterPlayer()
 
-    # initialize the game
-    p1 = RandomPlayer("kevin")
-    p2 = RandomPlayer("marvin")
+    sim = Simulation((rows, cols, cutoff, handicap), CluPlayer, randPlayer, 0, (True, True, True, True, 1))
+    sim.run()
 
 
-    while True:
-        game = Game(rows, cols, cutoff, handicap, p1._classPath, p2._classPath)
-        game.ignoreMirrorMatch = False
-        while not game.gameOver():
-            if printGame:
-                print(p1.actionMove(game), "p1")
-                print(game)
-                time.sleep(delay)
-                if not game.gameOver():
-                    print(p2.actionMove(game), "p2")
-                    print(game)
-                    time.sleep(delay)
-            else:
-                p1.actionMove(game)
-                if not game.gameOver():
-                    p2.actionMove(game)
-
-        game.save()     
 

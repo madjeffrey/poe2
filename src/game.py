@@ -1,8 +1,6 @@
 from datetime import datetime
-from player import Player
 import os
 import json
-import sys
 
 
 """
@@ -53,23 +51,20 @@ class Game:
         self.__currentPlayer = 0 # 0 __player 1 or 1 __player 2
         self.__p1Score = int(0)
         self.__p2Score = float(handicap)
+        self.__newGame = True ## could change this whole check to just be if the board is empty, but this would be called often, and so it would be slow to compute
 
         # needed for my efficient implementation of __calcScore
         # self.matrixLines = [[[0 for _ in range(4)] for _ in range(self.__NUMCOLS)] for _ in range(self.__NUMROWS)] #[/, \, |, -]
 
-        # which board version is correct?
-        #self.__board= [[0 for _ in range(self.__NUMCOLS)] for _ in range(self.__NUMROWS)] #if wanting to use regular list
-        self.__board= []
-        for _ in range(self.__NUMROWS):
-            self.__board.append([0]*self.__NUMCOLS)
+        self.__board = [[0]*self.__NUMCOLS for _ in range(self.__NUMROWS)]
 
         # store the players
         self.__p1ClassPath = p1Path
         self.__p2ClassPath = p2Path
-        # recording mariables
-        self.ignoreMirrorMatch = True
-        self.showStatistics = True
-        self.recordGames = True
+        # recording match variables
+        self.__ignoreMirrorMatch = True
+        self.__recordStatistics = True
+        self.__recordGames = True
 
     def __str__(self):
         '''
@@ -84,6 +79,8 @@ class Game:
         
         return output + "\n__________________________________\n"
 
+
+    # getter and setter functions
     def getId(self) -> str:
         """
         returns the id for a given game
@@ -148,8 +145,29 @@ class Game:
         for y in range(self.__NUMROWS):
             for x in range(self.__NUMCOLS):
                 if self.__board[y][x] == 0:
-                    moves.append((x, y))
+                    moves.append((y, x))
         return moves
+
+    def getIgnoreMirrorMatch(self):
+        return self.__ignoreMirrorMatch
+    
+    def setIgnoreMirrorMatch(self, ignoreMirrorMatch):
+        self.__ignoreMirrorMatch = ignoreMirrorMatch
+    
+    def getRecordGames(self):
+        return self.__recordGames
+    
+    def setRecordGames(self, recordGames):
+        self.__recordGames = recordGames
+
+    def getRecordStats(self):
+        return self.__recordStatistics
+    
+    def setRecordStats(self, recordStats):
+        self.__recordStatistics = recordStats
+    
+    def getIsNewGame(self):
+        return self.__newGame
     
     
     def playMove(self, row, col) -> int:
@@ -169,6 +187,7 @@ class Game:
             return 2
 
         ## could these be assertions, or then this would stop the program which is not what I want
+        self.__newGame = False
 
         # update the board state
         if self.__currentPlayer:
@@ -212,6 +231,7 @@ class Game:
         False if no moves to undo
         '''
         if not self.__moveHistory:
+            self.__newGame = True
             return False
         
         status = self.__moveHistory.pop()
@@ -329,10 +349,10 @@ class Game:
 
     def save(self):
         # save the states of the game if it finished
-        if self.gameOver() and self.showStatistics:
+        if self.gameOver() and self.__recordStatistics:
             # ignore matches where it plays each other since it will always win and lose
             mirror = self.__p1ClassPath == self.__p2ClassPath
-            if mirror and self.ignoreMirrorMatch:
+            if mirror and self.__ignoreMirrorMatch:
                 print("This is a mirror match and we wish to ignore them!")
                 return
             
@@ -346,7 +366,7 @@ class Game:
             
             
             # record the stats of a game
-            if self.recordGames:
+            if self.__recordGames:
                 gamePath = f"../statistics/games/{p1}vs{p2}"
                 os.makedirs(gamePath, exist_ok=True)
                 with open((gamePath + "/" + self.__id + ".json"), "w") as file:
