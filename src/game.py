@@ -404,7 +404,7 @@ class Game:
                 elif self.__won == 2:
                     winner = __p2Class
                 else:
-                    assert self.__won != 0, "game is over but no winner"
+                    assert self.__won != 0, "game is over but no winner"    
                 init = self.getInit()
                 moveHistory = self.getMoveHistory()
                 __gameStats = {"id": self.getId(), "class1": __p1Class, "class2": __p2Class, "winner": self.getWinner(), "winnerType": winner, "numberMoves": moveHistory[1], "moveHistory": moveHistory[0], "scores":self.getPlayerScores(), "finalBoard": self.getBoard(), "initialGame": {"numRows":  init[0], "numCols":  init[1], "scoreCutoff": init[2], "handicap": init[3]}}
