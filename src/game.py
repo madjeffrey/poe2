@@ -9,7 +9,7 @@ import sys
 todo:
 [x] make w+ into r+ by checking first if the file exists or not
 [x] edit id so that it is only : separated numbers
-[] make it so that the players wins and losses are divided by who he beat as well, record against opponent (should be a dict to key in opponent)
+[x] make it so that the players wins and losses are divided by who he beat as well, record against opponent (should be a dict to key in opponent)
 [] get current working directory to calculate path to store the statistics as for now must be run in src
 
 tasks:
@@ -339,16 +339,17 @@ class Game:
             p1 = self.__p1ClassPath.split("/")[-1].removesuffix(".json")
             p2 = self.__p2ClassPath.split("/")[-1].removesuffix(".json")
             # update stats for player 1
-            self.__recordPlayerStats(self, self.__p1ClassPath, 1, p2)
+            self.__recordPlayerStats(self.__p1ClassPath, 1, p2)
         
             # update stats for player 2
-            self.__recordPlayerStats(self, self.__p2ClassPath, 2, p1)
+            self.__recordPlayerStats(self.__p2ClassPath, 2, p1)
             
             
             # record the stats of a game
             if self.recordGames:
-                os.makedirs("../statistics/games/{p1}vs{p2}", exist_ok=True)
-                with open((f"../statistics/games/{p1}vs{p2}/{self.__id}.json"), "w") as file:
+                gamePath = f"../statistics/games/{p1}vs{p2}"
+                os.makedirs(gamePath, exist_ok=True)
+                with open((gamePath + "/" + self.__id + ".json"), "w") as file:
                     __p1Class = self.__p1ClassPath.split("/")[-1].removesuffix(".json")
                     __p2Class = self.__p2ClassPath.split("/")[-1].removesuffix(".json")
                     if self.__won == 1:
@@ -359,9 +360,9 @@ class Game:
                         assert self.__won != 0, "game is over but no winner"    
                     init = self.getInit()
                     moveHistory = self.getMoveHistory()
-                    __gameStats = {"id": self.getId(), "class1": __p1Class, "class2": __p2Class, "winner": self.getWinner(), "winnerType": winner, "numberMoves": moveHistory[1], "moveHistory": moveHistory[0], "scores":self.getPlayerScores(), "finalBoard": self.getBoard(), "initialGame": {"numRows":  init[0], "numCols":  init[1], "scoreCutoff": init[2], "handicap": init[3]}}
+                    __gameStats = {"id": self.getId(), "class1": __p1Class, "class2": __p2Class, "winner": self.getWinner(), "winnerType": winner, "numberMoves": moveHistory[1], "scores":self.getPlayerScores(), "initialGame": {"numRows":  init[0], "numCols":  init[1], "scoreCutoff": init[2], "handicap": init[3]}, "finalBoard": self.getBoard(),"moveHistory": moveHistory[0]}
                     file.seek(0)
-                    self.__dump_dicts_with_flat_lists(__gameStats, file)
+                    json.dump(__gameStats, file)
                     file.truncate()
 
 
@@ -372,63 +373,37 @@ class Game:
             __pClass = path.split("/")[-1].removesuffix(".json")
             # if the file does not exist make the file
             if not os.path.exists(path):
-                with open(path, "a") as file:
+                with open(path, "w") as file:
                     # check if the file is empty, if so create a new dict
-                    __stats = {"class": __pClass, "gamesPlayed": 0, "gamesWon": 0, "gamesLost":0, "gamesWonAsP1": 0, "gamesWonAsP2":0, "winning" : {"opponentClass": oppClass, "gamesWon":0, "gamesLost":0, "gamesWonAsP1": 0, "gamesWonAsP2":0, "gamesList":[]}}
-            
+                    __stats = {"class": __pClass, "gamesPlayed": 0, "gamesWon": 0, "gamesLost":0, "gamesWonAsP1": 0, "gamesWonAsP2":0, "winningVS" : { oppClass : { "gamesPlayed" : 0, "gamesWon":0, "gamesLost":0, "gamesWonAsP1": 0, "gamesWonAsP2":0, "gamesList":[] } } }
+                    json.dump(__stats, file)
             
             # open the file to read than write 
             with open(path, "r+") as file:
-                if not __stats:
-                    __stats = json.load(file)
+                __stats = json.load(file)
                 # update the stats for the game just played
                 __stats["gamesPlayed"] += 1
-                __stats["winning"]["opponent"] = oppClass
-                __stats["winning"]["gamesPlayed"] += 1
+                # check if first time facing opponent if so initialize key
+                if oppClass not in __stats["winningVS"].keys():
+                    __stats["winningVS"][oppClass] = { "gamesPlayed" : 0, "gamesWon":0, "gamesLost":0, "gamesWonAsP1": 0, "gamesWonAsP2":0, "gamesList":[] }
+                
+                __stats["winningVS"][oppClass]["gamesPlayed"] = 1 + __stats["winningVS"][oppClass]["gamesPlayed"]
                 if self.__won == playerOrder:
                     __stats["gamesWon"] += 1
                     __stats[f"gamesWonAsP{playerOrder}"] += 1
-                    __stats["winning"]["gamesWon"] += 1
-                    __stats["winning"][f"gamesWonAsP{playerOrder}"] += 1
+                    __stats["winningVS"][oppClass]["gamesWon"] += 1
+                    __stats["winningVS"][oppClass][f"gamesWonAsP{playerOrder}"] += 1
                 else:
                     assert self.__won != 0, "there is no winner when there should be"
                     __stats["gamesLost"] += 1
-                    __stats["winning"]["gamesLost"] += 1
+                    __stats["winningVS"][oppClass]["gamesLost"] += 1
                 
-                __stats["winning"]["gamesList"].append(self.__id)
+                __stats["winningVS"][oppClass]["gamesList"].append(self.__id)
                 file.seek(0)
-                self.__dump_dicts_with_flat_lists(__stats, file)
+                json.dump(__stats, file)
                 file.truncate()
             
 
-
-    def __dump_dicts_with_flat_lists(self, obj, file, indent=4):
-        """
-        Dumps a dictionary to JSON:
-        - Dictionaries are indented
-        - Lists are kept on a single line
-        Works recursively for nested dicts.
-        """
-
-        def __encode(obj, level=0):
-            spacing = " " * (level * indent)
-            if isinstance(obj, dict):
-                items = []
-                for k, v in obj.items():
-                    key = json.dumps(k)
-                    if isinstance(v, dict):
-                        value = "".join(__encode(v, level + 1))
-                    elif isinstance(v, list):
-                        # Keep list on one line
-                        value = json.dumps(v)
-                    else:
-                        value = json.dumps(v)
-                    items.append(f"{spacing}{' ' * indent}{key}: {value}")
-                return ["{\n" + ",\n".join(items) + f"\n{spacing}}}"]
-            else:
-                return [json.dumps(obj)]
-
-        file.write("".join(__encode(obj)))
 
 
 
