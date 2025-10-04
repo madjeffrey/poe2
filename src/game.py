@@ -8,8 +8,9 @@ import sys
 """
 todo:
 [x] make w+ into r+ by checking first if the file exists or not
+[x] edit id so that it is only : separated numbers
 [] get current working directory to calculate path to store the statistics as for now must be run in src
-[] edit id so that it is only : separated numbers
+[] make it so that the players wins and losses are divided by who he beat as well, record against opponent (should be a dict to key in opponent)
 
 tasks:
 [] test my game to find the bug with my score calculation
@@ -41,7 +42,6 @@ class Game:
         self.__id = now.strftime("%Y_%m_%d_%H_%M_%S_") + f"{int(now.microsecond/1000):08d}"
         # Game state  
         # all caps = const
-        self.__id = "".join(c for c in self.__id if c.isdigit())
         self.__NUMCOLS = int(numCols)
         self.__NUMROWS = int(numRows)
         self.__SCORECUTOFF = float(scoreCutoff)
@@ -341,7 +341,7 @@ class Game:
                 if not os.path.exists(self.__p1ClassPath):
                     with open(self.__p1ClassPath, "a") as file:
                         # check if the file is empty, if so create a new dict
-                        __stats = {"class": __p1Class, "gamesPlayed": 0, "gamesWon": 0, "gamesLost":0, "gamesList":[]}
+                        __stats = {"class": __p1Class, "gamesPlayed": 0, "gamesWon": 0, "gamesWonAsP1": 0, "gamesWonAsP2":0, "gamesLost":0, "gamesList":[]}
                 
                 
                 # open the file to read than write 
@@ -353,6 +353,7 @@ class Game:
                     __stats["gamesList"].append(self.__id)
                     if self.__won == 1:
                         __stats["gamesWon"] += 1
+                        __stats["gamesWonAsP1"] += 1
                     elif self.__won == 2:
                         __stats["gamesLost"] += 1
                     else:
@@ -386,6 +387,7 @@ class Game:
                         __stats["gamesList"].append(self.__id)
                     if self.__won == 2:
                         __stats["gamesWon"] += 1
+                        __stats["gamesWonAsP2"] += 1
                     elif self.__won == 1:
                         __stats["gamesLost"] += 1
                     else:
@@ -405,7 +407,7 @@ class Game:
                     assert self.__won != 0, "game is over but no winner"
                 init = self.getInit()
                 moveHistory = self.getMoveHistory()
-                __gameStats = {"id": self.getId(), "p1": __p1Class, "class2": __p2Class, "winner": winner, "numberMoves": moveHistory[1], "moveHistor": moveHistory[0], "scores":self.getPlayerScores(), "finalBoard": self.getBoard(), "initialGame": {"numRows":  init[0], "numCols":  init[1], "handicap": init[2], "scoreCutoff": init[3]}}
+                __gameStats = {"id": self.getId(), "p1": __p1Class, "class2": __p2Class, "winner": self.getWinner(), "winnerType": winner, "numberMoves": moveHistory[1], "moveHistor": moveHistory[0], "scores":self.getPlayerScores(), "finalBoard": self.getBoard(), "initialGame": {"numRows":  init[0], "numCols":  init[1], "handicap": init[2], "scoreCutoff": init[3]}}
                 file.seek(0)
                 self.__dump_dicts_with_flat_lists(__gameStats, file)
                 file.truncate()
