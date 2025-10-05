@@ -3,7 +3,7 @@ from Players.player import Player
 from Players.randomPlayer import RandomPlayer
 from Players.clusterPlayer import ClusterPlayer
 import time
-
+import random
 
 """
 Question: 
@@ -46,6 +46,12 @@ class Simulation:
             self.__game.setRecordGames(self.__settings[2])
             self.__game.setIgnoreMirrorMatch(self.__settings[3])
             # give the players references to the game and set their order since it is a new game
+            num = random.random()
+            if num < 0.5:
+                tmp = self.__p1
+                self.__p1 = self.__p2
+                self.__p2 = tmp
+        
             self.__p1.setGame(self.__game, 1)
             self.__p2.setGame(self.__game, 2)
             while not self.__game.gameOver():
@@ -81,8 +87,9 @@ if __name__ == "__main__":
     randPlayer = RandomPlayer()
     CluPlayer = ClusterPlayer()
     cluPlayer = ClusterPlayer()
+    
 
-    sim = Simulation((rows, cols, cutoff, handicap), CluPlayer, cluPlayer, 0, (False, True, False, False, 1))
+    sim = Simulation((rows, cols, cutoff, handicap), CluPlayer, randPlayer, 50000, (False, True, True, False, 0))
     sim.run()
 
 
