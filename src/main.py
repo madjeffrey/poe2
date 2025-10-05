@@ -80,8 +80,9 @@ if __name__ == "__main__":
     # initialize the players
     randPlayer = RandomPlayer()
     CluPlayer = ClusterPlayer()
+    cluPlayer = ClusterPlayer()
 
-    sim = Simulation((rows, cols, cutoff, handicap), CluPlayer, randPlayer, 0, (True, True, True, True, 1))
+    sim = Simulation((rows, cols, cutoff, handicap), CluPlayer, cluPlayer, 0, (False, True, False, False, 1))
     sim.run()
 
 

@@ -1,5 +1,6 @@
 from Players.player import Player
 from game import Game
+import random
 
 """
 Questions: is it more efficient to pass a reference to the board in once, and then can still access the board, or will this board but out of date to the current state of the board
@@ -9,6 +10,7 @@ it definitely is and so I will implement it
 class ClusterPlayer(Player):
     def __init__(self, name="clusterBot"):
         self._desc = "This player will always take a random legal action given the dimensions of the board"
+        self.__first = True
         super().__init__(name)
     
 
@@ -19,20 +21,24 @@ class ClusterPlayer(Player):
         assert self._game, "no game: set the game"
         assert self._game.getCurrentPlayer() == self._playerOrder-1, f"ERROR: not player {self._playerOrder}'s turn, but tries to play"
 
-        # if no stones on the board take the center
-        if self._game.getIsNewGame():
+        if self.__first:
+            self.__first = False
             self.__startState = self._game.getInit()
             self.__clusterBoard= [[0]*self.__startState[1] for _ in range(self.__startState[0])]
+
+        # if no stones on the board take the center
+        if self._game.getIsNewGame():
             self._row = self.__startState[0]//2
             self._col = self.__startState[1]//2
             self._game.playMove(self._row, self._col)
             self._updateClusters(self._row, self._col)
             return (self._row, self._col)
 
+
         # update the cluster with the other players move
         ## could also easily make a cluster player that only cares about clustering his pieces
         moveHistory = self._game.getMoveHistory()[0] # this is good because it doesn't allow poping so therefore I am not changing the state
-        fullMove = moveHistory.pop()
+        fullMove = moveHistory[-1]
         move = fullMove[0]
         self._updateClusters(move[0],move[1])
         # sets the row and col to the legal move with the max num of neighbors
@@ -77,7 +83,11 @@ class ClusterPlayer(Player):
         est = -1
         possibleMoves = self._game.getPossibleMoves()
         for row, col in possibleMoves:
-            if est < self.__clusterBoard[row][col]:
-                est = self.__clusterBoard[row][col]
-                self._row = row
-                self._col = col
+            if est <= self.__clusterBoard[row][col]:
+                if est < self.__clusterBoard[row][col]:
+                    optimalMoves = []
+                    est = self.__clusterBoard[row][col]
+                optimalMoves.append((row,col))
+
+        bestMove = random.choice(optimalMoves)
+        self._row, self._col= bestMove[0], bestMove[1]

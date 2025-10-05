@@ -17,6 +17,7 @@ tasks:
 
 maybe:
 [] make it so that the description of the player is shown in the game logs and player logs
+[] update so that the wins are calculated for the given board startState, size, cutoff, handicap
 """
 
 class Game:
@@ -188,7 +189,7 @@ class Game:
 
         ## could these be assertions, or then this would stop the program which is not what I want
         self.__newGame = False
-
+        movesPlayer = self.__currentPlayer
         # update the board state
         if self.__currentPlayer:
             self.__board[row][col] = 2
@@ -206,7 +207,7 @@ class Game:
         self.gameOver()
 
         # add the move history to the list for undo
-        self.__moveHistory.append(((row,col),(self.__p1Score, self.__p2Score), self.__currentPlayer, self.__won))
+        self.__moveHistory.append(((row,col),(self.__p1Score, self.__p2Score), movesPlayer , self.__won))
 
         return 1
 
@@ -418,7 +419,8 @@ class Game:
                     __stats["gamesLost"] += 1
                     __stats["winningVS"][oppClass]["gamesLost"] += 1
                 
-                __stats["winningVS"][oppClass]["gamesList"].append(self.__id)
+                if self.__recordGames:
+                    __stats["winningVS"][oppClass]["gamesList"].append(self.__id)
                 file.seek(0)
                 json.dump(__stats, file)
                 file.truncate()
