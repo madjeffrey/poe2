@@ -7,9 +7,9 @@ Questions: is it more efficient to pass a reference to the board in once, and th
 it definitely is and so I will implement it
 """
 
-class ClusterPlayer(Player):
-    def __init__(self, name="clusterBot"):
-        self._desc = "This player will always take a random legal action with the least number of empty adjacent cells given the dimensions of the board"
+class FriendlyNeighborPlayer(Player):
+    def __init__(self, name="friendlyBot"):
+        self._desc = "This player will always take a random legal action that maximizes the number of adjacent friendly stones given the dimensions of the board"
         self.__first = True
         super().__init__(name)
     
@@ -33,13 +33,7 @@ class ClusterPlayer(Player):
             self._game.playMove(self._row, self._col)
             self._updateClusters(self._row, self._col)
             return (self._row, self._col)
-
-
-        # update the cluster with the other players move
-        moveHistory = self._game.getMoveHistory()[0] # this is good because it doesn't allow poping so therefore I am not changing the state
-        fullMove = moveHistory[-1]
-        move = fullMove[0]
-        self._updateClusters(move[0],move[1])
+        
         # sets the row and col to the legal move with the max num of neighbors
         self._maxClusterPos()
         # play the move

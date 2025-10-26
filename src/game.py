@@ -4,6 +4,10 @@ import json
 
 
 """
+Question:
+- who should save the stats for the game, if I want to have a simulation class that can play many of different 2 player alternating games then game should save it, I think this is how I want it
+
+
 todo:
 [x] make w+ into r+ by checking first if the file exists or not
 [x] edit id so that it is only : separated numbers
@@ -49,7 +53,7 @@ class Game:
         self.__won = 0
         self.__numMoves = 0
         self.__moveHistory = [] #((row:int,col:int),(p1score:float, p2score:float), cur__player:int, winner:int)
-        self.__currentPlayer = 0 # 0 __player 1 or 1 __player 2
+        self.__currentPlayer = 1 # 1 __player 1 or 2 __player 2
         self.__p1Score = int(0)
         self.__p2Score = float(handicap)
         self.__newGame = True ## could change this whole check to just be if the board is empty, but this would be called often, and so it would be slow to compute
@@ -133,8 +137,8 @@ class Game:
     def getCurrentPlayer(self):
         """
         return: the current player 
-        0 = player 1 
-        1 = player 2
+        1 = player 1 
+        2 = player 2
         """
         return self.__currentPlayer
 
@@ -191,12 +195,12 @@ class Game:
         self.__newGame = False
         movesPlayer = self.__currentPlayer
         # update the board state
-        if self.__currentPlayer:
+        if self.__currentPlayer == 2:
             self.__board[row][col] = 2
-            self.__currentPlayer = 0
+            self.__currentPlayer = 1
         else:
             self.__board[row][col] = 1
-            self.__currentPlayer = 1
+            self.__currentPlayer = 2
     
         # calculate the score through all the four possible directions of lines
         self.__calcScore() # does not currently need arguments

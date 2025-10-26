@@ -2,6 +2,7 @@ from game import Game
 from Players.player import Player
 from Players.randomPlayer import RandomPlayer
 from Players.clusterPlayer import ClusterPlayer
+from Players.friendlyNeighborPlayer import FriendlyNeighborPlayer 
 import time
 import random
 
@@ -40,20 +41,25 @@ class Simulation:
         # if iterations = 0 then go for infinity, if iterations does not equal 0 then go until count = iterations
         count = 0
         while not self.__iterations or count < self.__iterations:
-            # create a new game of the same type and settings
-            self.__game = Game(self.__startBoard[0], self.__startBoard[1], self.__startBoard[2], self.__startBoard[3], self.__p1.getClassPath(), self.__p2.getClassPath())
-            self.__game.setRecordStats(self.__settings[1])
-            self.__game.setRecordGames(self.__settings[2])
-            self.__game.setIgnoreMirrorMatch(self.__settings[3])
-            # give the players references to the game and set their order since it is a new game
+            # randomly flit which player goes first or second
+            # fixed error of before the update paths for who went first or second would be wrong
             num = random.random()
             if num < 0.5:
                 tmp = self.__p1
                 self.__p1 = self.__p2
                 self.__p2 = tmp
+
+            # create a new game of the same type and settings
+            self.__game = Game(self.__startBoard[0], self.__startBoard[1], self.__startBoard[2], self.__startBoard[3], self.__p1.getClassPath(), self.__p2.getClassPath())
+            self.__game.setRecordStats(self.__settings[1])
+            self.__game.setRecordGames(self.__settings[2])
+            self.__game.setIgnoreMirrorMatch(self.__settings[3])
         
+            # give the players references to the game and set their order since it is a new game
             self.__p1.setGame(self.__game, 1)
             self.__p2.setGame(self.__game, 2)
+
+            # run an episode
             while not self.__game.gameOver():
                 if self.__printGame:
                     print(self.__p1.actionMove(), "p1")
@@ -87,9 +93,10 @@ if __name__ == "__main__":
     randPlayer = RandomPlayer()
     CluPlayer = ClusterPlayer()
     cluPlayer = ClusterPlayer()
+    friendlyPlayer = FriendlyNeighborPlayer()
     
-
-    sim = Simulation((rows, cols, cutoff, handicap), CluPlayer, randPlayer, 50000, (False, True, True, False, 0))
+    #                                                                            printGame, recordStats, recordGame, ignoreMirror, delay
+    sim = Simulation((rows, cols, cutoff, handicap), friendlyPlayer, randPlayer, 50000, (False, True, True, False, 0))
     sim.run()
 
 
