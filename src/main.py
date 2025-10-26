@@ -95,8 +95,10 @@ if __name__ == "__main__":
     cluPlayer = ClusterPlayer()
     friendlyPlayer = FriendlyNeighborPlayer()
     
+
+    # it is saving more games than the limit says, maybe i just didn't save the main file before setting it to 50000
     #                                                                            printGame, recordStats, recordGame, ignoreMirror, delay
-    sim = Simulation((rows, cols, cutoff, handicap), friendlyPlayer, randPlayer, 50000, (False, True, True, False, 0))
+    sim = Simulation((rows, cols, cutoff, handicap), friendlyPlayer, randPlayer, 5000, (False, True, True, False, 0))
     sim.run()
 
 
