@@ -1,0 +1,19 @@
+Notes:
+- For low cutoff games, clusters are better
+- For games that must terminate, long bars save an entire game of losing. So you must cut off long bars for the opponent. 
+
+
+
+
+New agents:
+Denfence
+- creates a wall that divides it in half
+- playes like that hexagon game, down the center
+
+RL agent:
+- learns how to win by getting rewarded for winning
+Problems:
+- how to store the solutions, 
+- for a 10 by 10 board would need 160 bits for a hashmap
+    soln:
+    - make the games with cutoff so that it can terminate faster if playing wellm
