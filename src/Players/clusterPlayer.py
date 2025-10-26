@@ -9,10 +9,17 @@ it definitely is and so I will implement it
 
 class ClusterPlayer(Player):
     def __init__(self, name="clusterBot"):
+        super().__init__(name)
         self._desc = "This player will always take a random legal action with the least number of empty adjacent cells given the dimensions of the board"
         self.__first = True
-        super().__init__(name)
-    
+        self.__seed = 0 
+        
+    # override testable
+    def isTestable(self):
+        return True
+
+    def setSeed(self, seed:int):
+        self.__seed = seed
 
     def actionMove(self)->tuple:
         """
@@ -88,5 +95,7 @@ class ClusterPlayer(Player):
                     est = self.__clusterBoard[row][col]
                 optimalMoves.append((row,col))
 
+        if self.__seed:
+            random.seed(self.__seed)
         bestMove = random.choice(optimalMoves)
         self._row, self._col= bestMove[0], bestMove[1]

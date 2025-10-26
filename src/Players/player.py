@@ -21,13 +21,15 @@ class Player:
 
     def getClassPath(self):
         """
-        returns the file path to the class for statistics
+        returns:
+            the file path to the class for statistics
         """
         return self._classPath
 
     def getPlayerOrder(self):
         """
-        returns if player is unassigned: 0, player 1: 1 or player 2: 2
+        returns:
+            if player is unassigned: 0, player 1: 1 or player 2: 2
         """
         return self._playerOrder
     
@@ -38,13 +40,17 @@ class Player:
         self._game = game
         self._playerOrder = order
 
+    def isTestable(self):
+        return False
 
     def actionMove(self)->tuple:
         """
         required implementation for subclass
-        returns: tuple of move played
-        (-69, -69) means not implemented
-        Player only needs to know about the game here, and not at initialization
+        
+        returns: 
+            tuple of move played
+            (-69, -69) means not implemented
+            Player only needs to know about the game here, and not at initialization
         """
         assert self._game, "no game found: cannot make a move"
         return (self._row, self._col)

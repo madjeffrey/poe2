@@ -10,7 +10,8 @@ class RandomPlayer(Player):
 
     def actionMove(self)->tuple:
         """
-        return True if move was successfully played
+        returns:
+            True if move was successfully played
         """
         # will this be an updated version of the game, if not just call it with the game before it makes a decision
         # am I able to update the game state from within this function
