@@ -8,9 +8,13 @@ import random
 
 """
 Question: 
-[] should the simulation handle the recording of games, or have the game record itself
+[x] should the simulation handle the recording of games, or have the game record itself
+- game should record itself to allow the simulation to handle any 2 player games
+
+
 todo:
 [x] have setter for mirror match, recordGames, recordStats
+[ ] store the dictionary for many runs and then update them every once in a while say every 1000 runs
 """
 # made simulation class so that the player is able to know if it is his turn, also improves generalizability
 # also was able to have settings to see if we want iterations or infinite
