@@ -1,0 +1,309 @@
+         387017431 function calls (319617259 primitive calls) in 154.557 seconds
+
+   Ordered by: cumulative time
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+     13/1    0.000    0.000  154.557  154.557 {built-in method builtins.exec}
+        1    0.000    0.000  154.557  154.557 main.py:1(<module>)
+        1    0.442    0.442  154.550  154.550 main.py:40(run)
+     5000    0.759    0.000  103.172    0.021 game.py:355(save)
+    15000   12.966    0.001   94.562    0.006 __init__.py:120(dump)
+    10000    0.232    0.000   83.362    0.008 game.py:394(__recordPlayerStats)
+ 35555000    7.267    0.000   57.029    0.000 encoder.py:415(_iterencode)
+92355000/35555000   19.562    0.000   49.736    0.000 encoder.py:334(_iterencode_dict)
+   500000    0.810    0.000   34.479    0.000 game.py:178(playMove)
+   505000   33.904    0.000   33.904    0.000 game.py:286(__calcScore)
+45335000/34735000   19.373    0.000   29.970    0.000 encoder.py:278(_iterencode_list)
+   250000    0.591    0.000   25.665    0.000 friendlyNeighborPlayer.py:17(actionMove)
+   250000    1.398    0.000   24.760    0.000 randomPlayer.py:11(actionMove)
+ 35540000   14.425    0.000   24.399    0.000 {method 'write' of '_io.TextIOWrapper' objects}
+ 28655000    7.580    0.000    9.986    0.000 <frozen codecs>:330(reset)
+   247531    1.382    0.000    6.806    0.000 friendlyNeighborPlayer.py:75(_maxClusterPos)
+  2596916    0.823    0.000    5.726    0.000 random.py:336(randint)
+ 28315000    5.543    0.000    5.543    0.000 {built-in method _json.encode_basestring_ascii}
+  2596916    1.985    0.000    4.904    0.000 random.py:295(randrange)
+ 42625286    4.701    0.000    4.701    0.000 {built-in method builtins.isinstance}
+   247531    3.172    0.000    4.588    0.000 game.py:145(getPossibleMoves)
+    10000    0.207    0.000    3.532    0.000 __init__.py:274(load)
+    10000    0.036    0.000    2.523    0.000 __init__.py:299(loads)
+  2844447    1.640    0.000    2.483    0.000 random.py:245(_randbelow_with_getrandbits)
+    10000    0.050    0.000    2.477    0.000 decoder.py:340(decode)
+ 28655000    2.406    0.000    2.406    0.000 <frozen codecs>:279(reset)
+    10000    2.365    0.000    2.365    0.000 decoder.py:351(raw_decode)
+ 15328269    1.817    0.000    1.817    0.000 {method 'append' of 'list' objects}
+    15000    1.332    0.000    1.332    0.000 {method 'truncate' of '_io.TextIOWrapper' objects}
+    15000    1.169    0.000    1.198    0.000 {built-in method _io.open}
+   250000    0.342    0.000    0.971    0.000 friendlyNeighborPlayer.py:48(_updateClusters)
+    10000    0.413    0.000    0.801    0.000 {method 'read' of '_io.TextIOWrapper' objects}
+  7790748    0.720    0.000    0.720    0.000 {built-in method _operator.index}
+     5000    0.006    0.000    0.655    0.000 game.py:130(getPlayerScores)
+  1000000    0.629    0.000    0.629    0.000 friendlyNeighborPlayer.py:61(_updateLineCluster)
+   247531    0.190    0.000    0.550    0.000 random.py:345(choice)
+  4650660    0.473    0.000    0.473    0.000 {method 'getrandbits' of '_random.Random' objects}
+  1015000    0.403    0.000    0.403    0.000 game.py:259(gameOver)
+    10000    0.033    0.000    0.389    0.000 <frozen codecs>:322(decode)
+  2844447    0.369    0.000    0.369    0.000 {method 'bit_length' of 'int' objects}
+    10000    0.356    0.000    0.356    0.000 {built-in method _codecs.utf_8_decode}
+   515000    0.352    0.000    0.352    0.000 encoder.py:224(floatstr)
+  1798458    0.287    0.000    0.287    0.000 game.py:219(isLegal)
+     5000    0.038    0.000    0.276    0.000 <frozen os>:203(makedirs)
+     5000    0.101    0.000    0.255    0.000 game.py:40(__init__)
+    15000    0.028    0.000    0.247    0.000 <frozen genericpath>:16(exists)
+    20072    0.232    0.000    0.232    0.000 {built-in method posix.stat}
+  1615000    0.225    0.000    0.225    0.000 {built-in method builtins.id}
+    15012    0.210    0.000    0.210    0.000 {method '__exit__' of '_io._IOBase' objects}
+  1303459    0.198    0.000    0.198    0.000 game.py:113(getInit)
+    15000    0.134    0.000    0.169    0.000 encoder.py:205(iterencode)
+    15000    0.126    0.000    0.141    0.000 {method 'seek' of '_io.TextIOWrapper' objects}
+     5000    0.121    0.000    0.121    0.000 {method 'strftime' of 'datetime.date' objects}
+     5000    0.087    0.000    0.087    0.000 {built-in method posix.mkdir}
+510508/510478    0.086    0.000    0.086    0.000 {built-in method builtins.len}
+    10000    0.069    0.000    0.069    0.000 player.py:34(setGame)
+     5000    0.038    0.000    0.065    0.000 <frozen posixpath>:100(split)
+    20000    0.048    0.000    0.048    0.000 {method 'match' of 're.Pattern' objects}
+    35004    0.036    0.000    0.036    0.000 {method 'split' of 'str' objects}
+    15000    0.035    0.000    0.035    0.000 encoder.py:263(_make_iterencode)
+     5000    0.033    0.000    0.033    0.000 {built-in method now}
+   250000    0.029    0.000    0.029    0.000 game.py:137(getCurrentPlayer)
+   250000    0.027    0.000    0.027    0.000 game.py:174(getIsNewGame)
+     5000    0.007    0.000    0.024    0.000 <frozen genericpath>:48(isdir)
+    10000    0.020    0.000    0.024    0.000 <frozen codecs>:312(__init__)
+    35000    0.022    0.000    0.022    0.000 {method 'removesuffix' of 'str' objects}
+    40007    0.014    0.000    0.014    0.000 {method 'items' of 'dict' objects}
+     5000    0.005    0.000    0.014    0.000 game.py:103(getWinner)
+     5000    0.006    0.000    0.012    0.000 <frozen posixpath>:42(_get_sep)
+    10000    0.009    0.000    0.009    0.000 {method 'keys' of 'dict' objects}
+    20000    0.008    0.000    0.008    0.000 {method 'end' of 're.Match' objects}
+     18/5    0.000    0.000    0.007    0.001 <frozen importlib._bootstrap>:1349(_find_and_load)
+     18/5    0.000    0.000    0.006    0.001 <frozen importlib._bootstrap>:1304(_find_and_load_unlocked)
+    10000    0.006    0.000    0.006    0.000 player.py:22(getClassPath)
+    15000    0.006    0.000    0.006    0.000 <frozen codecs>:189(__init__)
+    10018    0.006    0.000    0.006    0.000 {method 'startswith' of 'str' objects}
+     18/6    0.000    0.000    0.006    0.001 <frozen importlib._bootstrap>:911(_load_unlocked)
+     12/5    0.000    0.000    0.005    0.001 <frozen importlib._bootstrap_external>:1020(exec_module)
+    37/11    0.000    0.000    0.005    0.000 <frozen importlib._bootstrap>:480(_call_with_frames_removed)
+     5390    0.005    0.000    0.005    0.000 {method 'rstrip' of 'str' objects}
+     5024    0.004    0.000    0.004    0.000 {method 'rfind' of 'str' objects}
+     5000    0.004    0.000    0.004    0.000 {built-in method _stat.S_ISDIR}
+     5000    0.004    0.000    0.004    0.000 {method 'random' of '_random.Random' objects}
+        1    0.000    0.000    0.004    0.004 game.py:1(<module>)
+    10000    0.003    0.000    0.003    0.000 <frozen codecs>:263(__init__)
+    15000    0.003    0.000    0.003    0.000 <frozen codecs>:206(reset)
+     5036    0.003    0.000    0.003    0.000 {built-in method posix.fspath}
+        1    0.000    0.000    0.003    0.003 __init__.py:1(<module>)
+     5000    0.002    0.000    0.002    0.000 game.py:119(getMoveHistory)
+     5000    0.002    0.000    0.002    0.000 game.py:171(setRecordStats)
+       12    0.000    0.000    0.002    0.000 <frozen importlib._bootstrap_external>:1093(get_code)
+        1    0.000    0.000    0.002    0.002 decoder.py:1(<module>)
+       18    0.000    0.000    0.001    0.000 <frozen importlib._bootstrap>:1240(_find_spec)
+        2    0.000    0.000    0.001    0.001 {built-in method builtins.__import__}
+        7    0.000    0.000    0.001    0.000 __init__.py:287(compile)
+        7    0.000    0.000    0.001    0.000 __init__.py:330(_compile)
+     5000    0.001    0.000    0.001    0.000 game.py:165(setRecordGames)
+        7    0.000    0.000    0.001    0.000 _compiler.py:743(compile)
+       13    0.000    0.000    0.001    0.000 <frozen importlib._bootstrap_external>:1551(find_spec)
+       13    0.000    0.000    0.001    0.000 <frozen importlib._bootstrap_external>:1522(_get_spec)
+        1    0.000    0.000    0.001    0.001 randomPlayer.py:1(<module>)
+        1    0.000    0.000    0.001    0.001 <frozen importlib._bootstrap>:1390(_handle_fromlist)
+     5000    0.001    0.000    0.001    0.000 game.py:96(getBoard)
+       26    0.000    0.000    0.001    0.000 <frozen importlib._bootstrap_external>:1624(find_spec)
+     5000    0.001    0.000    0.001    0.000 game.py:89(getId)
+       12    0.000    0.000    0.001    0.000 <frozen importlib._bootstrap_external>:782(_compile_bytecode)
+       12    0.001    0.000    0.001    0.000 {built-in method marshal.loads}
+     5000    0.001    0.000    0.001    0.000 game.py:159(setIgnoreMirrorMatch)
+        1    0.000    0.000    0.001    0.001 scanner.py:1(<module>)
+        7    0.000    0.000    0.001    0.000 _parser.py:970(parse)
+     14/7    0.000    0.000    0.001    0.000 _parser.py:451(_parse_sub)
+        1    0.000    0.000    0.001    0.001 random.py:1(<module>)
+     16/7    0.000    0.000    0.001    0.000 _parser.py:511(_parse)
+        7    0.000    0.000    0.000    0.000 _compiler.py:576(_code)
+        1    0.000    0.000    0.000    0.000 encoder.py:1(<module>)
+       18    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:806(module_from_spec)
+       12    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:1214(get_data)
+       18    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:416(__enter__)
+       20    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:304(acquire)
+     27/7    0.000    0.000    0.000    0.000 _compiler.py:37(_compile)
+       72    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:145(_path_stat)
+       18    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:733(_init_module_attrs)
+       11    0.000    0.000    0.000    0.000 {built-in method builtins.__build_class__}
+      183    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:131(_path_join)
+       12    0.000    0.000    0.000    0.000 {built-in method _io.open_code}
+       24    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:513(cache_from_source)
+        1    0.000    0.000    0.000    0.000 datetime.py:1(<module>)
+       24    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:632(cached)
+       20    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:162(__enter__)
+       12    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:642(_get_cached)
+        5    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:997(exec_module)
+       28    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:164(_path_isfile)
+        5    0.000    0.000    0.000    0.000 {built-in method _imp.exec_builtin}
+       15    0.000    0.000    0.000    0.000 _compiler.py:241(_optimize_charset)
+       32    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:155(_path_is_mode_type)
+       31    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:1500(_path_importer_cache)
+       20    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:124(setdefault)
+        7    0.000    0.000    0.000    0.000 _compiler.py:514(_compile_info)
+       20    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:426(_get_module_lock)
+        5    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:989(create_module)
+       12    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:1619(_get_spec)
+        4    0.000    0.000    0.000    0.000 enum.py:1596(__or__)
+       18    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:420(__exit__)
+       12    0.000    0.000    0.000    0.000 {method 'read' of '_io.BufferedReader' objects}
+        5    0.000    0.000    0.000    0.000 {built-in method _imp.create_builtin}
+       24    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:137(_path_split)
+       11    0.000    0.000    0.000    0.000 enum.py:695(__call__)
+       20    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:372(release)
+        2    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:1675(_fill_cache)
+    33/13    0.000    0.000    0.000    0.000 _parser.py:177(getwidth)
+        2    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:1487(_path_hooks)
+      131    0.000    0.000    0.000    0.000 _parser.py:167(__getitem__)
+       11    0.000    0.000    0.000    0.000 enum.py:1156(__new__)
+        2    0.000    0.000    0.000    0.000 {built-in method posix.listdir}
+        1    0.000    0.000    0.000    0.000 bisect.py:1(<module>)
+       18    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:982(find_spec)
+       12    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:833(spec_from_file_location)
+        6    0.000    0.000    0.000    0.000 _parser.py:97(closegroup)
+        2    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:463(_lock_unlock_module)
+      209    0.000    0.000    0.000    0.000 {method 'join' of 'str' objects}
+        2    0.000    0.000    0.000    0.000 enum.py:1459(_missing_)
+       12    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:697(_classify_pyc)
+       90    0.000    0.000    0.000    0.000 _parser.py:260(get)
+       20    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:74(__new__)
+        7    0.000    0.000    0.000    0.000 enum.py:1607(__and__)
+       28    0.000    0.000    0.000    0.000 {built-in method builtins.max}
+       12    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:1233(path_stats)
+       36    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:89(_unpack_uint32)
+        2    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:1716(path_hook_for_FileFinder)
+       12    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:730(_validate_timestamp_pyc)
+       13    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:1128(find_spec)
+       16    0.000    0.000    0.000    0.000 _parser.py:311(_class_escape)
+      129    0.000    0.000    0.000    0.000 _parser.py:239(__next)
+       58    0.000    0.000    0.000    0.000 {built-in method builtins.min}
+       18    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:445(cb)
+        5    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:662(spec_from_loader)
+       94    0.000    0.000    0.000    0.000 _parser.py:255(match)
+        5    0.000    0.000    0.000    0.000 _compiler.py:389(_mk_bitmap)
+       18    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:232(__init__)
+        4    0.000    0.000    0.000    0.000 player.py:13(__init__)
+        6    0.000    0.000    0.000    0.000 {built-in method posix.getcwd}
+        7    0.000    0.000    0.000    0.000 enum.py:1449(_iter_member_by_def_)
+      183    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:491(_verbose_message)
+       15    0.000    0.000    0.000    0.000 _compiler.py:214(_compile_charset)
+      101    0.000    0.000    0.000    0.000 {built-in method builtins.getattr}
+        1    0.000    0.000    0.000    0.000 random.py:119(__init__)
+        1    0.000    0.000    0.000    0.000 friendlyNeighborPlayer.py:1(<module>)
+        2    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:1598(__init__)
+        4    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:1398(__iter__)
+       33    0.000    0.000    0.000    0.000 enum.py:1589(_get_value)
+        1    0.000    0.000    0.000    0.000 game.py:27(Game)
+       48    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:139(<genexpr>)
+       96    0.000    0.000    0.000    0.000 {method 'rpartition' of 'str' objects}
+        1    0.000    0.000    0.000    0.000 clusterPlayer.py:1(<module>)
+       20    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:79(__init__)
+       20    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:82(remove)
+       56    0.000    0.000    0.000    0.000 _parser.py:163(__len__)
+        1    0.000    0.000    0.000    0.000 random.py:128(seed)
+       13    0.000    0.000    0.000    0.000 _parser.py:448(_uniq)
+       32    0.000    0.000    0.000    0.000 {method 'format' of 'str' objects}
+        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
+      9/6    0.000    0.000    0.000    0.000 _compiler.py:439(_get_literal_prefix)
+       82    0.000    0.000    0.000    0.000 {method 'get' of 'dict' objects}
+       44    0.000    0.000    0.000    0.000 _parser.py:292(tell)
+        2    0.000    0.000    0.000    0.000 {built-in method builtins.sorted}
+       44    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:1226(__exit__)
+       45    0.000    0.000    0.000    0.000 {built-in method builtins.hasattr}
+        2    0.000    0.000    0.000    0.000 <frozen zipimport>:68(__init__)
+        1    0.000    0.000    0.000    0.000 decoder.py:262(JSONDecoder)
+       44    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:1222(__enter__)
+        1    0.000    0.000    0.000    0.000 player.py:1(<module>)
+       18    0.000    0.000    0.000    0.000 {built-in method _imp.is_builtin}
+       14    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:190(_path_abspath)
+       10    0.000    0.000    0.000    0.000 _compiler.py:401(_simple)
+       12    0.000    0.000    0.000    0.000 {built-in method _imp._fix_co_filename}
+       26    0.000    0.000    0.000    0.000 _parser.py:175(append)
+       12    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:674(_check_name_wrapper)
+        4    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:1384(_recalculate)
+        1    0.000    0.000    0.000    0.000 randomPlayer.py:6(__init__)
+       20    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:173(__exit__)
+       13    0.000    0.000    0.000    0.000 {built-in method _imp.find_frozen}
+       18    0.000    0.000    0.000    0.000 {method 'extend' of 'list' objects}
+        1    0.000    0.000    0.000    0.000 random.py:103(Random)
+       20    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:645(parent)
+        4    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:169(_path_isdir)
+        5    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:1380(_get_parent_path)
+       82    0.000    0.000    0.000    0.000 {built-in method _imp.acquire_lock}
+       82    0.000    0.000    0.000    0.000 {built-in method _imp.release_lock}
+        2    0.000    0.000    0.000    0.000 clusterPlayer.py:11(__init__)
+       13    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:48(_new_module)
+       23    0.000    0.000    0.000    0.000 {built-in method __new__ of type object at 0xa05020}
+        1    0.000    0.000    0.000    0.000 {function Random.seed at 0x7f64c43f2200}
+       59    0.000    0.000    0.000    0.000 {method 'find' of 'bytearray' objects}
+        7    0.000    0.000    0.000    0.000 enum.py:1439(_iter_member_by_value_)
+       40    0.000    0.000    0.000    0.000 {method '__exit__' of '_thread.RLock' objects}
+        6    0.000    0.000    0.000    0.000 _parser.py:85(opengroup)
+       25    0.000    0.000    0.000    0.000 {method 'pop' of 'dict' objects}
+        7    0.000    0.000    0.000    0.000 _parser.py:230(__init__)
+       14    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:185(_path_isabs)
+        6    0.000    0.000    0.000    0.000 _compiler.py:470(_get_charset_prefix)
+        5    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:501(_requires_builtin_wrapper)
+       36    0.000    0.000    0.000    0.000 {built-in method from_bytes}
+        7    0.000    0.000    0.000    0.000 {built-in method builtins.setattr}
+        1    0.000    0.000    0.000    0.000 decoder.py:292(__init__)
+       26    0.000    0.000    0.000    0.000 _parser.py:82(groups)
+        4    0.000    0.000    0.000    0.000 _parser.py:264(getwhile)
+       40    0.000    0.000    0.000    0.000 {built-in method _thread.get_ident}
+       34    0.000    0.000    0.000    0.000 {method 'setdefault' of 'dict' objects}
+        1    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:1363(__init__)
+       13    0.000    0.000    0.000    0.000 {built-in method fromkeys}
+       11    0.000    0.000    0.000    0.000 _parser.py:171(__setitem__)
+       18    0.000    0.000    0.000    0.000 {built-in method _thread.allocate_lock}
+        7    0.000    0.000    0.000    0.000 {built-in method _sre.compile}
+       14    0.000    0.000    0.000    0.000 _compiler.py:573(isstring)
+       27    0.000    0.000    0.000    0.000 {method 'pop' of 'list' objects}
+       20    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:599(__init__)
+       28    0.000    0.000    0.000    0.000 _parser.py:112(__init__)
+        1    0.000    0.000    0.000    0.000 {built-in method posix.register_at_fork}
+       20    0.000    0.000    0.000    0.000 {method 'remove' of 'list' objects}
+        7    0.000    0.000    0.000    0.000 enum.py:115(_iter_bits_lsb)
+        7    0.000    0.000    0.000    0.000 _parser.py:954(fix_flags)
+       20    0.000    0.000    0.000    0.000 {built-in method _weakref._remove_dead_weakref}
+        5    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:1370(_find_parent_path_names)
+        1    0.000    0.000    0.000    0.000 friendlyNeighborPlayer.py:11(__init__)
+        4    0.000    0.000    0.000    0.000 enum.py:199(__get__)
+       29    0.000    0.000    0.000    0.000 {built-in method builtins.ord}
+        1    0.000    0.000    0.000    0.000 {built-in method math.exp}
+       32    0.000    0.000    0.000    0.000 {built-in method builtins.chr}
+        1    0.000    0.000    0.000    0.000 encoder.py:74(JSONEncoder)
+       26    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:71(_relax_case)
+        1    0.000    0.000    0.000    0.000 friendlyNeighborPlayer.py:10(FriendlyNeighborPlayer)
+        1    0.000    0.000    0.000    0.000 _parser.py:371(_escape)
+       12    0.000    0.000    0.000    0.000 {method 'endswith' of 'str' objects}
+       12    0.000    0.000    0.000    0.000 _compiler.py:31(_combine_flags)
+       15    0.000    0.000    0.000    0.000 _compiler.py:431(_get_iscased)
+       18    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:412(__init__)
+        1    0.000    0.000    0.000    0.000 random.py:225(__init_subclass__)
+       20    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:158(__init__)
+       18    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:1604(<genexpr>)
+        1    0.000    0.000    0.000    0.000 main.py:20(__init__)
+        5    0.000    0.000    0.000    0.000 {method 'translate' of 'bytearray' objects}
+        1    0.000    0.000    0.000    0.000 random.py:880(SystemRandom)
+       18    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:653(has_location)
+        4    0.000    0.000    0.000    0.000 {method 'replace' of 'str' objects}
+        1    0.000    0.000    0.000    0.000 player.py:2(Player)
+       12    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:1184(__init__)
+        1    0.000    0.000    0.000    0.000 clusterPlayer.py:10(ClusterPlayer)
+        1    0.000    0.000    0.000    0.000 decoder.py:20(JSONDecodeError)
+       12    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:1017(create_module)
+        7    0.000    0.000    0.000    0.000 _parser.py:76(__init__)
+        1    0.000    0.000    0.000    0.000 main.py:19(Simulation)
+       12    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:1209(get_filename)
+        4    0.000    0.000    0.000    0.000 enum.py:1337(value)
+        1    0.000    0.000    0.000    0.000 randomPlayer.py:5(RandomPlayer)
+        1    0.000    0.000    0.000    0.000 encoder.py:105(__init__)
+        2    0.000    0.000    0.000    0.000 {built-in method math.log}
+        4    0.000    0.000    0.000    0.000 {built-in method builtins.iter}
+        5    0.000    0.000    0.000    0.000 enum.py:1456(<lambda>)
+        5    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:1014(is_package)
+        1    0.000    0.000    0.000    0.000 {method 'insert' of 'list' objects}
+        1    0.000    0.000    0.000    0.000 {built-in method math.sqrt}
+        1    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:1439(exec_module)
+
+

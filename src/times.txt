@@ -1,3 +1,5 @@
+for sol 5000 runs
+
          702042889 function calls (571696843 primitive calls) in 201.140 seconds
 
    Ordered by: cumulative time
