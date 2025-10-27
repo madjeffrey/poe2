@@ -1,4 +1,7 @@
 from game import Game
+import json
+import os
+
 class Player:
     """
     This is a template super class for a given player that will implement a given stategy
@@ -17,7 +20,22 @@ class Player:
         self._row = -69 # current estimate of next move
         self._col = -69 # current estimate of next move
         self._classPath = "../statistics/classes/" + str(self.__class__).split(".")[-1].replace("'>", ".json")
+        self.initStats()
         assert self._desc, "class does not have a description"
+
+    def initStats(self)->dict:
+        """
+        creates a dictionary or pulls it if it exists
+        """
+        # if the file does not exist make the file
+        if not os.path.exists(self._classPath):
+            with open(self._classPath, "w") as file:
+                # check if the file is empty, if so create a new dict
+                self._stats = {"class": type(self).__name__, "gamesPlayed": 0, "gamesWon": 0, "gamesLost":0, "gamesWonAsP1": 0, "gamesWonAsP2":0, "winningVS" : {} }
+                json.dump(self._stats, file)
+        else:
+            with open(self._classPath, "r+") as file:
+                self._stats = json.load(file)
 
     def getClassPath(self):
         """

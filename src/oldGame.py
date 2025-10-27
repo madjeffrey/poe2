@@ -1,5 +1,8 @@
 from game import Game
 class OldGame(Game):
+    """
+    Ignore this class it does not do exactly what I wanted, changed all of game class private attributes to protected
+    """
     def __init__(self, numRows:int, numCols:int, scoreCutoff:float, handicap:float, p1Path:str, p2Path:str):
         super()._init_(numRows, numCols, scoreCutoff, handicap, p1Path, p2Path)
     

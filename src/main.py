@@ -2,6 +2,7 @@ from simulation import Simulation
 from Players.randomPlayer import RandomPlayer
 from Players.clusterPlayer import ClusterPlayer
 from Players.friendlyNeighborPlayer import FriendlyNeighborPlayer 
+from test import TestRun
 
 if __name__ == "__main__":
     # rules for main
@@ -22,8 +23,10 @@ if __name__ == "__main__":
     
 
     # it is saving more games than the limit says, maybe i just didn't save the main file before setting it to 50000
-    sim = Simulation((rows, cols, cutoff, handicap), friendlyPlayer, randPlayer, 5000, (False, True, True, False, 0))
-    sim.run()
+    #sim = Simulation((rows, cols, cutoff, handicap), friendlyPlayer, randPlayer, 5000, (False, True, True, False, 0))
+    #sim.run()
+    test = TestRun((rows, cols, cutoff, handicap), friendlyPlayer, cluPlayer, 5000, (True, True, True, False, 0.1, 100))
+    test.run()
 
 
 

@@ -9,8 +9,8 @@ it definitely is and so I will implement it
 
 class ClusterPlayer(Player):
     def __init__(self, name="clusterBot"):
-        super().__init__(name)
         self._desc = "This player will always take a random legal action with the least number of empty adjacent cells given the dimensions of the board"
+        super().__init__(name)
         self.__first = True
         self.__seed = 0 
         

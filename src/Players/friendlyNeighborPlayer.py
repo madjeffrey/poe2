@@ -9,8 +9,8 @@ it definitely is and so I will implement it
 
 class FriendlyNeighborPlayer(Player):
     def __init__(self, name="friendlyBot"):
-        super().__init__(name)
         self._desc = "This player will always take a random legal action that maximizes the number of adjacent friendly stones given the dimensions of the board"
+        super().__init__(name)
         self.__first = True
         self.__seed = 0
 

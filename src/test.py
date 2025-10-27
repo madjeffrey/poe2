@@ -7,8 +7,8 @@ from simulation import Simulation
 import time
 import random
 
-class testRun(Simulation):
-    def __init__(startBoard:tuple, p1:Player, p2:Player, iterations:int=0, settings:tuple=(False, True, True, True, 0)):
+class TestRun(Simulation):
+    def __init__(self, startBoard:tuple, p1:Player, p2:Player, iterations:int=0, settings:tuple=(False, True, True, True, 0, 10000)):
         """
         Args:
             startBoard(numRows, numCols, scoreCutoff, handicap)
@@ -17,69 +17,78 @@ class testRun(Simulation):
             iterations: 0 -> inf else n interations
             settings:(printGame, recordStats, recordGames, ignoreMirrorMatch, delay(in seconds))
         """
-        super.__init__(startBoard, p1, p2, iterations, settings)
+        super().__init__(startBoard, p1, p2, iterations, settings)
 
     def run(self):
         # if iterations = 0 then go for infinity, if iterations does not equal 0 then go until count = iterations
         count = 0
-        assert self.__p1.isTestable() and self.__p2.isTestable(), 'one of the players is not testable'
-        while not self.__iterations or count < self.__iterations:
+        assert self._p1.isTestable() and self._p2.isTestable(), f'one of the players is not testable, p1:{self._p1}, p2: {self._p2}'
+        while not self._iterations or count < self._iterations:
             # randomly flit which player goes first or second
             # fixed error of before the update paths for who went first or second would be wrong
             num = random.random()
             if num < 0.5:
-                tmp = self.__p1
-                self.__p1 = self.__p2
-                self.__p2 = tmp
+                tmp = self._p1
+                self._p1 = self._p2
+                self._p2 = tmp
 
             # create a new game of the same type and settings
-            self.__game = Game(self.__startBoard[0], self.__startBoard[1], self.__startBoard[2], self.__startBoard[3], self.__p1.getClassPath(), self.__p2.getClassPath())
-            self.__game.setRecordStats(self.__settings[1])
-            self.__game.setRecordGames(self.__settings[2])
-            self.__game.setIgnoreMirrorMatch(self.__settings[3])
+            self._game = Game(self._startBoard[0], self._startBoard[1], self._startBoard[2], self._startBoard[3])
+            self._game.setRecordStats(self._settings[1])
+            self._game.setRecordGames(self._settings[2])
+            self._game.setIgnoreMirrorMatch(self._settings[3])
 
         
             # give the players references to the game and set their order since it is a new game
-            self.__p1.setGame(self.__game, 1)
-            self.__p2.setGame(self.__game, 2)
+            self._p1.setGame(self._game, 1)
+            self._p2.setGame(self._game, 2)
 
             # set the seed making sure we have the right classes
-            self.__p1.setSeed(count+3)
-            self.__p2.setSeed(count+5)
+            self._p1.setSeed(count+3)
+            self._p2.setSeed(count+5)
 
 
             # run an episode
-            while not self.__game.gameOver():
-                if self.__printGame:
-                    print(self.__p1.actionMove(), "p1")
-                    print(self.__game)
-                    time.sleep(self.__delay)
-                    if not self.__game.gameOver():
-                        print(self.__p2.actionMove(), "p2")
-                        print(self.__game)
-                        time.sleep(self.__delay)
+            while not self._game.gameOver():
+                if self._printGame:
+                    # print the type of the players then the game
+                    print(f"p1: {type(self._p1)} | p2: {type(self._p2)}")
+                    print(self._p1.actionMove(), "p1")
+                    self._runTest()
+                    print(self._game)
+                    time.sleep(self._delay)
+                    if not self._game.gameOver():
+                        # print the type of the players then the game
+                        print(f"p1: {type(self._p1)} | p2: {type(self._p2)}")
+                        print(self._p2.actionMove(), "p2")
+                        self._runTest()
+                        print(self._game)
+                        time.sleep(self._delay)
                 else:
-                    self.__p1.actionMove()
-                    self.__runTest()
-                    if not self.__game.gameOver():
-                        self.__p2.actionMove()
-                        self.__runTest()
+                    self._p1.actionMove()
+                    self._runTest()
+                    if not self._game.gameOver():
+                        self._p2.actionMove()
+                        self._runTest()
 
-            self.__game.save()
+            if self._recordStatistics:
+                self._saveGame()
+                if not (count+1)%self._recordInterval:
+                    self._savePlayerStats()
             count += 1
 
 
-    def __runTest(self):
+    def _runTest(self):
         """
         run tests
         """
-        self.__scoreTest()
+        self._scoreTest()
 
 
-    def __scoreTest(self):
+    def _scoreTest(self):
         """
         after a move is played check if the scores are the same
         """
-        linearScore = self.__game.getPlayerScores()
-        exponentialScore = self.__game.calcScoreSlow()
-        assert linearScore == exponentialScore, f'\n****************************\nTest Failed: scores are not the same\nlinearScore: {linearScore}\nexponentialScore: {exponentialScore}\n{str(self.__game)}\n{self.__game.getMoveHistory()}\n****************************\n'
+        linearScore = self._game.getPlayerScores()
+        exponentialScore = self._game.calcScoreSlow()
+        assert linearScore == exponentialScore, f'\n****************************\nTest Failed: scores are not the same\nlinearScore: {linearScore}\nexponentialScore: {exponentialScore}\n{str(self._game)}\n{self._game.getMoveHistory()}\n****************************\n'
