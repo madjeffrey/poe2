@@ -25,11 +25,7 @@ class RandomPlayer(Player):
         assert self._game, "no game: set the game"
         while True:
             init = self._game.getInit()
-            if self.__seed:
-                rand.seed(self.__seed)
             self._row = rand.randint(0, init[0]-1)
-            if self.__seed:
-                rand.seed(self.__seed)
             self._col = rand.randint(0, init[1]-1)
             if self._game.isLegal(self._row, self._col):
                 self._game.playMove(self._row, self._col)

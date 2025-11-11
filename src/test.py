@@ -34,18 +34,13 @@ class TestRun(Simulation):
 
             # create a new game of the same type and settings
             self._game = Game(self._startBoard[0], self._startBoard[1], self._startBoard[2], self._startBoard[3])
-            self._game.setRecordStats(self._settings[1])
-            self._game.setRecordGames(self._settings[2])
-            self._game.setIgnoreMirrorMatch(self._settings[3])
-
         
             # give the players references to the game and set their order since it is a new game
             self._p1.setGame(self._game, 1)
             self._p2.setGame(self._game, 2)
 
             # set the seed making sure we have the right classes
-            self._p1.setSeed(count+3)
-            self._p2.setSeed(count+5)
+            random.seed(count+12)
 
 
             # run an episode
@@ -67,9 +62,15 @@ class TestRun(Simulation):
                 else:
                     self._p1.actionMove()
                     self._runTest()
+                    while self._game.getCurrentPlayer() == 1:
+                        self._p1.actionMove()
+                        self._runTest()
                     if not self._game.gameOver():
                         self._p2.actionMove()
                         self._runTest()
+                        while self._game.getCurrentPlayer() == 2:
+                            self._p2.actionMove()
+                            self._runTest()
 
             if self._recordStatistics:
                 self._saveGame()
@@ -100,5 +101,19 @@ class TestRun(Simulation):
 
 
     def _undoTest(self):
-        while random.random() < 0.75:
+        num = random.random()
+        count = 0
+        while num < 0.001:
+            num = random.random()/990
+            future = self._game.getCurrentPlayer()
+            print(self._game, count)
+            count += 1
             self._game.undo()
+            if future == 1:
+                if self._game.getIsNewGame():
+                    assert self._game.getCurrentPlayer() == 1, f"\n****************************\nTest Failed: Undo failed switching player.\nfuture Player: {future}\nNew Player: {self._game.getCurrentPlayer()}\n{str(self._game)}\n{self._game.getMoveHistory()}\n****************************\n"
+                else:
+                    assert self._game.getCurrentPlayer() == 2, f"\n****************************\nTest Failed: Undo failed switching player.\nfuture Player: {future}\nNew Player: {self._game.getCurrentPlayer()}\n{str(self._game)}\n{self._game.getMoveHistory()}\n****************************\n"
+            else:
+                assert self._game.getCurrentPlayer() == 1, f"\n****************************\nTest Failed: Undo failed switching player.\nfuture Player: {future}\nNew Player: {self._game.getCurrentPlayer()}\n{str(self._game)}\n{self._game.getMoveHistory()}\n****************************\n"
+            self._scoreTest

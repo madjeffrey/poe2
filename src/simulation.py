@@ -63,9 +63,6 @@ class Simulation:
 
             # create a new game of the same type and settings
             self._game = Game(self._startBoard[0], self._startBoard[1], self._startBoard[2], self._startBoard[3])
-            self._game.setRecordStats(self._settings[1])
-            self._game.setRecordGames(self._settings[2])
-            self._game.setIgnoreMirrorMatch(self._settings[3])
         
             # give the players references to the game and set their order since it is a new game
             self._p1.setGame(self._game, 1)

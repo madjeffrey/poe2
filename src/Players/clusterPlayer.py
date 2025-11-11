@@ -19,7 +19,11 @@ class ClusterPlayer(Player):
         return True
 
     def setSeed(self, seed:int):
+        """
+        I don't think I need this
+        """
         self.__seed = seed
+
 
     def actionMove(self)->tuple:
         """
@@ -95,7 +99,5 @@ class ClusterPlayer(Player):
                     est = self.__clusterBoard[row][col]
                 optimalMoves.append((row,col))
 
-        if self.__seed:
-            random.seed(self.__seed)
         bestMove = random.choice(optimalMoves)
         self._row, self._col= bestMove[0], bestMove[1]

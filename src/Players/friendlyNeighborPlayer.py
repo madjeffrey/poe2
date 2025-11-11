@@ -89,7 +89,5 @@ class FriendlyNeighborPlayer(Player):
                     est = self.__clusterBoard[row][col]
                 optimalMoves.append((row,col))
 
-        if self.__seed:
-            random.seed(self.__seed)
         bestMove = random.choice(optimalMoves)
         self._row, self._col= bestMove[0], bestMove[1]

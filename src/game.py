@@ -162,23 +162,6 @@ class Game:
                     moves.append((y, x))
         return moves
 
-    def getIgnoreMirrorMatch(self):
-        return self._ignoreMirrorMatch
-    
-    def setIgnoreMirrorMatch(self, ignoreMirrorMatch):
-        self._ignoreMirrorMatch = ignoreMirrorMatch
-    
-    def getRecordGames(self):
-        return self._recordGames
-    
-    def setRecordGames(self, recordGames):
-        self._recordGames = recordGames
-
-    def getRecordStats(self):
-        return self._recordStatistics
-    
-    def setRecordStats(self, recordStats):
-        self._recordStatistics = recordStats
     
     def getIsNewGame(self):
         return self._newGame
@@ -260,13 +243,17 @@ class Game:
             return False
         
         status = self._moveHistory.pop()
+        # check if after popping it is a new game
+        if not self._moveHistory:
+            self._newGame = True
+
         self._numMoves -= 1
         self._board[status[0][0]][status[0][1]] = 0
         if self._moveHistory:
             newState = self._moveHistory[-1]
             self._p1Score = newState[1][0]
             self._p2Score = newState[1][1]
-            self._currentPlayer = newState[2]
+            self._currentPlayer = status[2]
             self._won = newState[3]
         else:
             self._numMoves = 0
