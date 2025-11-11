@@ -74,6 +74,6 @@ class Player:
         return (self._row, self._col)
     
     def __str__(self):
-        return f"Hello I am player {self.__name}, my strategy is: {self.__desc}"
+        return f"Hello I am player {self._name}, my strategy is: {self._desc}"
     
 

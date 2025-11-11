@@ -6,7 +6,14 @@ class RandomPlayer(Player):
     def __init__(self, name="randomBot"):
         self._desc = "This player will always take a random legal action given the dimensions of the board"
         super().__init__(name)
+        self.__seed = 0 
     
+    # override testable
+    def isTestable(self):
+        return True
+
+    def setSeed(self, seed:int):
+        self.__seed = seed
 
     def actionMove(self)->tuple:
         """
@@ -18,7 +25,11 @@ class RandomPlayer(Player):
         assert self._game, "no game: set the game"
         while True:
             init = self._game.getInit()
+            if self.__seed:
+                rand.seed(self.__seed)
             self._row = rand.randint(0, init[0]-1)
+            if self.__seed:
+                rand.seed(self.__seed)
             self._col = rand.randint(0, init[1]-1)
             if self._game.isLegal(self._row, self._col):
                 self._game.playMove(self._row, self._col)

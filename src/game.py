@@ -87,6 +87,8 @@ class Game:
     # getters since we do not want any setters as the board should only be manipulated through the play function
     def getBoard(self) -> list:
         """
+        returns a print of the board and the score and winner
+
         Args:
             None
         Returns: 
@@ -97,6 +99,8 @@ class Game:
 
     def getWinner(self) -> int:
         """
+        returns the winner of the game
+
         Args:
             None
         Returns:
@@ -107,6 +111,7 @@ class Game:
     
     def getInit(self)->tuple:
         """
+        returns the initialial parameters
         Args:
             None
         Returns:
@@ -212,6 +217,7 @@ class Game:
         self.gameOver()
 
         # add the move history to the list for undo
+        # the state played, the scores, the player who played that move, and if someone has won
         self._moveHistory.append(((row,col),(self._p1Score, self._p2Score), self._currentPlayer , self._won))
 
         # update the board needs to happen after calcScore because it needs to check for neighbors that are not the new move
@@ -265,7 +271,7 @@ class Game:
         else:
             self._numMoves = 0
             self._p1Score = 0
-            self._p2Score = self.HANDICAP
+            self._p2Score = self._HANDICAP
             self._currentPlayer = 1
             self._won = 0
         return True
@@ -533,6 +539,9 @@ class Game:
                             _p1Score += 1
                         else:
                             _p2Score += 1
+
+        self._p1Score = _p1Score
+        self._p2Score = _p2Score
         return (_p1Score, _p2Score)
 
 

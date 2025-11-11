@@ -52,14 +52,14 @@ class TestRun(Simulation):
             while not self._game.gameOver():
                 if self._printGame:
                     # print the type of the players then the game
-                    print(f"p1: {type(self._p1)} | p2: {type(self._p2)}")
+                    print(f"p1: {type(self._p1).__name__} | p2: {type(self._p2).__name__}")
                     print(self._p1.actionMove(), "p1")
                     self._runTest()
                     print(self._game)
                     time.sleep(self._delay)
                     if not self._game.gameOver():
                         # print the type of the players then the game
-                        print(f"p1: {type(self._p1)} | p2: {type(self._p2)}")
+                        print(f"p1: {type(self._p1).__name__} | p2: {type(self._p2).__name__}")
                         print(self._p2.actionMove(), "p2")
                         self._runTest()
                         print(self._game)
@@ -77,11 +77,16 @@ class TestRun(Simulation):
                     self._savePlayerStats()
             count += 1
 
+        if self._recordStatistics:
+            self._saveGame()
+            if not (count+1)%self._recordInterval:
+                self._savePlayerStats()
 
     def _runTest(self):
         """
         run tests
         """
+        self._undoTest()
         self._scoreTest()
 
 
@@ -92,3 +97,8 @@ class TestRun(Simulation):
         linearScore = self._game.getPlayerScores()
         exponentialScore = self._game.calcScoreSlow()
         assert linearScore == exponentialScore, f'\n****************************\nTest Failed: scores are not the same\nlinearScore: {linearScore}\nexponentialScore: {exponentialScore}\n{str(self._game)}\n{self._game.getMoveHistory()}\n****************************\n'
+
+
+    def _undoTest(self):
+        while random.random() < 0.75:
+            self._game.undo()

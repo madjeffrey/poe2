@@ -19,8 +19,9 @@ class Simulation:
 
     todo:
     [x] have setter for mirror match, recordGames, recordStats
-    [ ] store the dictionary for many runs and then update them every once in a while say every 1000 runs 
-    [ ] simulation saves the stats
+    [x] store the dictionary for many runs and then update them every once in a while say every 1000 runs 
+    [x] simulation saves the stats
+    [ ] assure the saved values are correct
     [ ] assure simulation saving makes it open ended and accessible
 
     """
@@ -61,7 +62,7 @@ class Simulation:
                 self._p2 = tmp
 
             # create a new game of the same type and settings
-            self._game = Game(self._startBoard[0], self._startBoard[1], self._startBoard[2], self._startBoard[3], self._p1.getClassPath(), self._p2.getClassPath())
+            self._game = Game(self._startBoard[0], self._startBoard[1], self._startBoard[2], self._startBoard[3])
             self._game.setRecordStats(self._settings[1])
             self._game.setRecordGames(self._settings[2])
             self._game.setIgnoreMirrorMatch(self._settings[3])
@@ -94,6 +95,11 @@ class Simulation:
                 if not (count+1)%self._recordInterval:
                     self._savePlayerStats()
             count += 1
+        
+        if self._recordStatistics:
+                self._saveGame()
+                if not (count+1)%self._recordInterval:
+                    self._savePlayerStats()
 
 
     def _saveGame(self):
