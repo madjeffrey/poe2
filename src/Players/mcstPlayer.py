@@ -44,7 +44,7 @@ class MCSTSolver():
                 self.weights = json.load(file)
 
                                                         # num samples, totScore, childrenHash, childrenCoords, symHashes (maybe do not need)
-        self.weights = defaultdict(lambda: [(-1,-1), 0, 0, [], []], self.weights)
+        self.weights = defaultdict(lambda: [0, 0, [], []], self.weights)
 
     def setSave(self, save:bool):
         self.save = save
@@ -71,13 +71,13 @@ class MCSTSolver():
                 self.storeWeights()
 
     def selection(self):
-        if len(self.weights[str(self.hashes[0])][3]) == 0:
+        if len(self.weights[str(self.hashes[0])][2]) == 0:
             score = -self.expansion()
         else:
             #play best ucb move
             # assert self.weights[str(self.hashes[0])][0] > 0, f"log of 0 does not exist in selection, {self.weights[str(self.hashes[0])]}"
             selectedChildIndex = self.UCBSelection()
-            selectedMove = self.weights[str(self.hashes[0])][4][selectedChildIndex]
+            selectedMove = self.weights[str(self.hashes[0])][3][selectedChildIndex]
             self.updateHash(selectedMove, self.game.getCurrentPlayer())
             self.game.playMove(selectedMove[0], selectedMove[1])
             # redo selection to trverse the tree
@@ -87,8 +87,8 @@ class MCSTSolver():
             self.updateHash(selectedMove, self.game.getCurrentPlayer())
         
         # back propogation
-        self.weights[str(self.hashes[0])][2] += score
-        self.weights[str(self.hashes[0])][1] += 1
+        self.weights[str(self.hashes[0])][1] += score
+        self.weights[str(self.hashes[0])][0] += 1
         return score
 
     def expansion(self):
@@ -109,8 +109,8 @@ class MCSTSolver():
             self.updateHash(child, self.game.getCurrentPlayer())
             
             # add child to list of children through its hash
-            self.weights[str(parentHash[0])][3].append(self.hashes[0])
-            self.weights[str(parentHash[0])][4].append(child)
+            self.weights[str(parentHash[0])][2].append(self.hashes[0])
+            self.weights[str(parentHash[0])][3].append(child)
 
             # undo the hashes
             self.updateHash(child, self.game.getCurrentPlayer())
@@ -126,17 +126,17 @@ class MCSTSolver():
         # assert self.weights[str(self.hashes[0])][0] > 0, f"log of 0 does not exist in simulation, {self.weights[str(self.hashes[0])]}"
         selectedChildIndex = self.UCBSelection()
         # play the move to update the game board
-        selectedMove = self.weights[str(self.hashes[0])][4][selectedChildIndex]
+        selectedMove = self.weights[str(self.hashes[0])][3][selectedChildIndex]
         self.game.playMove(selectedMove[0], selectedMove[1])
         # update its total score and visit count of the selectedChild
-        selectedChildHash = str(self.weights[str(self.hashes[0])][3][selectedChildIndex])
-        self.weights[selectedChildHash][2] += self.randomWalk()
-        self.weights[selectedChildHash][2] += self.randomWalk()
-        self.weights[selectedChildHash][1] += 2
+        selectedChildHash = str(self.weights[str(self.hashes[0])][2][selectedChildIndex])
+        self.weights[selectedChildHash][1] += self.randomWalk()
+        self.weights[selectedChildHash][1] += self.randomWalk()
+        self.weights[selectedChildHash][0] += 2
 
         # undo the move played
         self.game.undo()
-        return self.weights[selectedChildHash][2]
+        return self.weights[selectedChildHash][1]
 
     def randomWalk(self):
         # if terminal game return the difference in scores
