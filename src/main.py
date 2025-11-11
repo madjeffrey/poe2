@@ -2,6 +2,7 @@ from simulation import Simulation
 from Players.randomPlayer import RandomPlayer
 from Players.clusterPlayer import ClusterPlayer
 from Players.friendlyNeighborPlayer import FriendlyNeighborPlayer 
+from Players.mcstPlayer import MCSTPlayer
 from test import TestRun
 
 
@@ -16,8 +17,8 @@ if __name__ == "__main__":
     printGame = False
     
     # set rules for the game
-    rows = 10
-    cols = 10
+    rows = 7
+    cols = 7
     cutoff = 0
     handicap = 0.5
     
@@ -26,14 +27,17 @@ if __name__ == "__main__":
     CluPlayer = ClusterPlayer()
     cluPlayer = ClusterPlayer()
     friendlyPlayer = FriendlyNeighborPlayer()
+    mcstPlayer = MCSTPlayer()
 
 
 
 
-    # sim = Simulation((rows, cols, cutoff, handicap), friendlyPlayer, randPlayer, 5000, (False, True, True, False, 0, 1000))
-    # sim.run()
-    test = TestRun((rows, cols, cutoff, handicap), friendlyPlayer, cluPlayer, 5000, (False, True, True, False, 0, 1000))
-    test.run()
+
+    sim = Simulation((rows, cols, cutoff, handicap), mcstPlayer, randPlayer, 5000, (False, True, False, False, 0, 5000))
+    sim.run()
+
+    # test = TestRun((rows, cols, cutoff, handicap), friendlyPlayer, cluPlayer, 5000, (False, True, True, False, 0, 1000))
+    # test.run()
 
 
 

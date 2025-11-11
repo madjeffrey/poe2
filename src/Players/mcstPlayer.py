@@ -1,4 +1,6 @@
 from game import Game
+from Players.player import Player
+from Players.friendlyNeighborPlayer import FriendlyNeighborPlayer
 import random
 import math
 import os
@@ -6,29 +8,78 @@ import json
 
 from collections import defaultdict
 
-class MCSTPlayer():
+class MCSTPlayer(Player):
     """
-    todo:
-    [] save the weights
-    Question:
-    - do I care how much I beat my opponnent by or just that I beat my opponent
+    This is the player that implements what is done in MCSTSolver by taking the weights trained and making actions on them
     """
-    pass
+    def __init__(self, name="mcstBot"):
+        self.solver = MCSTSolver()
+        self.backup = FriendlyNeighborPlayer()
+        self._desc = "This player will take the move that is best according to the MCST done prior to playing"
+        super().__init__(name)
+
+        assert os.path.exists(self.solver.getPath()), f"file to path {self.solver.getPath()} does not exist"
+        with open(self.solver.getPath(), "r+") as file: 
+            self.weights = json.load(file)
+
+    def actionMove(self):
+        assert self._game, "no game: set the game"
+        assert self._game.getCurrentPlayer() == self._playerOrder, f"ERROR: not player {self._playerOrder}'s turn, but tries to play for {self._game.getCurrentPlayer()}"
+
+        # get the hash of the board
+        bestI = 0
+        mostVisits = 0
+        curBoardHash = self.boardToHash()
+        # when the board has never been seen in testing act as backup plan
+        if str(curBoardHash) not in self.weights.keys():
+            self.backup.setGame(self._game, self.getPlayerOrder())
+            row, col = self.backup.actionMove()
+            return row, col
+        for i, childHash in enumerate(self.weights[str(curBoardHash)][3]):
+            # if the child has never been visited ignore the child
+            if str(childHash) not in self.weights.keys():
+                continue
+            if self.weights[str(childHash)][1] > mostVisits:
+                bestI = i
+                mostVisits = self.weights[str(childHash)][1]
+        
+        # how can I have a child that is in the childHashes but not in the ChildMoves
+        bestMove = self.weights[str(curBoardHash)][4][bestI]
+        self._game.playMove(bestMove[0], bestMove[1])
+        return bestMove
+
+    def boardToHash(self):
+        initBoard = self._game.getInit()
+        boardHash = 0
+        for row in range(initBoard[0]):
+            for col in range(initBoard[1]):
+                if self._game._board[row][col] == 0:
+                    continue
+                elif self._game._board[row][col] == 1:
+                    shift = 0
+                elif self._game._board[row][col] == 2:
+                    shift = 49
+
+                index = row*initBoard[0] + col
+                boardHash = boardHash ^ (1 << shift+index)
+        
+        return boardHash
 
 class MCSTSolver():
     """
     assume the board is a 7x7 with no cutoff and 0.5 advantage
     this class is used to train to be able to find the weights of each state, it allows for the MCST player to have good staring weights for each simulation
     todo:
-    [] save the weights
+    [x] save the weights
+    [ ] make sure that the score difference is what is should be
     Question:
         - do I care how much I beat my opponnent by or just that I beat my opponent
     """
-    def __init__(self, game:Game):
+    def __init__(self, game:Game=None):
         self.game = game
                         # id, hor, ver, dia, anti, 90, 180, 270
         self.hashes = [0,0,0,0,0,0,0,0]
-        self.version = "2"
+        self.version = "1"
         self.save = True
         self._iterations = None
         self.storeIteration = 10000
@@ -43,8 +94,9 @@ class MCSTSolver():
             with open(self.path, "r+") as file: 
                 self.weights = json.load(file)
 
-                                                        # num samples, totScore, childrenHash, childrenCoords, symHashes (maybe do not need)
-        self.weights = defaultdict(lambda: [(-1,-1, -1), 0, 0, [], []], self.weights)
+                                                        # move, num_samples, totScore, childrenHash, childrenCoords, symHashes (maybe do not need)
+        self.weights = defaultdict(lambda: [-1, 0, 0, [], []], self.weights)
+
 
     def setSave(self, save:bool):
         self.save = save
@@ -55,6 +107,9 @@ class MCSTSolver():
     def setIterations(self, iterations, storeIterations=10000):
         self._iterations = iterations
         self.storeIteration = storeIterations
+    
+    def getPath(self):
+        return self.path
 
     def runMCST(self):
         self.count = 0
@@ -66,7 +121,7 @@ class MCSTSolver():
             # self.hashes = [0,0,0,0,0,0,0,0]
             self.selection()
             self.count += 1
-            assert self.hashes == [0,0,0,0,0,0,0,0] and self.game._moveHistory == [], f"ERROR: not the defualt game upon return, hashes:{self.hashes}, moveHistory: {self.game._moveHistory}"
+            assert self.hashes == [0,0,0,0,0,0,0,0] and self.game._moveHistory == [], f"ERROR: not the defualt game upon return, hashes:{self.hashes}, moveHistory: {self.game._moveHistory}, {self.game.getBoard()}, {self.game.getMoveHistory()}"
             if not (self.count+1)%(self.storeIteration+1):
                 self.storeWeights()
 
@@ -96,6 +151,7 @@ class MCSTSolver():
         # if the state to expand is terminal, then return the diff value of the ending scores
         if self.game.gameOver():
             # get the curret score difference relative to the player to play at the node to be expanded
+            ## runs 2 so that is why the difference is never 0.5
             p1S, p2S = self.game.getPlayerScores()
             score = p1S - p2S
             if self.game.getCurrentPlayer() == 2:
@@ -124,6 +180,7 @@ class MCSTSolver():
             #     # append the child to the hash
             #     self.weights[self.hashes[i]][2].append(self.hashes[i])
 
+        assert len(self.weights[str(parentHash[0])][4]) == len(self.weights[str(parentHash[0])][3]), f"ERROR| the length of children hashes {len(self.weights[str(parentHash[0])][3])} does not match then length of children moves {len(self.weights[str(parentHash[0])][4])}"
         # Simulation x2
         # select child to be simulated
         # assert self.weights[str(self.hashes[0])][0] > 0, f"log of 0 does not exist in simulation, {self.weights[str(self.hashes[0])]}"
