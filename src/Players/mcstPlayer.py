@@ -28,7 +28,7 @@ class MCSTSolver():
         self.game = game
                         # id, hor, ver, dia, anti, 90, 180, 270
         self.hashes = [0,0,0,0,0,0,0,0]
-        self.version = "1"
+        self.version = "2"
         self.save = True
         self._iterations = None
         self.storeIteration = 10000
@@ -44,7 +44,7 @@ class MCSTSolver():
                 self.weights = json.load(file)
 
                                                         # num samples, totScore, childrenHash, childrenCoords, symHashes (maybe do not need)
-        self.weights = defaultdict(lambda: [0, 0, [], []], self.weights)
+        self.weights = defaultdict(lambda: [(-1,-1, -1), 0, 0, [], []], self.weights)
 
     def setSave(self, save:bool):
         self.save = save
@@ -67,17 +67,17 @@ class MCSTSolver():
             self.selection()
             self.count += 1
             assert self.hashes == [0,0,0,0,0,0,0,0] and self.game._moveHistory == [], f"ERROR: not the defualt game upon return, hashes:{self.hashes}, moveHistory: {self.game._moveHistory}"
-            if not (self.count+1)%self.storeIteration:
+            if not (self.count+1)%(self.storeIteration+1):
                 self.storeWeights()
 
     def selection(self):
-        if len(self.weights[str(self.hashes[0])][2]) == 0:
+        if len(self.weights[str(self.hashes[0])][3]) == 0:
             score = -self.expansion()
         else:
             #play best ucb move
             # assert self.weights[str(self.hashes[0])][0] > 0, f"log of 0 does not exist in selection, {self.weights[str(self.hashes[0])]}"
             selectedChildIndex = self.UCBSelection()
-            selectedMove = self.weights[str(self.hashes[0])][3][selectedChildIndex]
+            selectedMove = self.weights[str(self.hashes[0])][4][selectedChildIndex]
             self.updateHash(selectedMove, self.game.getCurrentPlayer())
             self.game.playMove(selectedMove[0], selectedMove[1])
             # redo selection to trverse the tree
@@ -87,8 +87,8 @@ class MCSTSolver():
             self.updateHash(selectedMove, self.game.getCurrentPlayer())
         
         # back propogation
-        self.weights[str(self.hashes[0])][1] += score
-        self.weights[str(self.hashes[0])][0] += 1
+        self.weights[str(self.hashes[0])][2] += score
+        self.weights[str(self.hashes[0])][1] += 1
         return score
 
     def expansion(self):
@@ -109,8 +109,11 @@ class MCSTSolver():
             self.updateHash(child, self.game.getCurrentPlayer())
             
             # add child to list of children through its hash
-            self.weights[str(parentHash[0])][2].append(self.hashes[0])
-            self.weights[str(parentHash[0])][3].append(child)
+            self.weights[str(parentHash[0])][3].append(self.hashes[0])
+            self.weights[str(parentHash[0])][4].append(child)
+            
+            #testing this is good for wanting to figure out which move is being played but drastically increases the size stored in memory
+            # self.weights[str(self.hashes[0])][0] = (child[0], child[1], self.game.getCurrentPlayer())
 
             # undo the hashes
             self.updateHash(child, self.game.getCurrentPlayer())
@@ -126,17 +129,17 @@ class MCSTSolver():
         # assert self.weights[str(self.hashes[0])][0] > 0, f"log of 0 does not exist in simulation, {self.weights[str(self.hashes[0])]}"
         selectedChildIndex = self.UCBSelection()
         # play the move to update the game board
-        selectedMove = self.weights[str(self.hashes[0])][3][selectedChildIndex]
+        selectedMove = self.weights[str(self.hashes[0])][4][selectedChildIndex]
         self.game.playMove(selectedMove[0], selectedMove[1])
         # update its total score and visit count of the selectedChild
-        selectedChildHash = str(self.weights[str(self.hashes[0])][2][selectedChildIndex])
-        self.weights[selectedChildHash][1] += self.randomWalk()
-        self.weights[selectedChildHash][1] += self.randomWalk()
-        self.weights[selectedChildHash][0] += 2
+        selectedChildHash = str(self.weights[str(self.hashes[0])][3][selectedChildIndex])
+        self.weights[selectedChildHash][2] += self.randomWalk()
+        self.weights[selectedChildHash][2] += self.randomWalk()
+        self.weights[selectedChildHash][1] += 2
 
         # undo the move played
         self.game.undo()
-        return self.weights[selectedChildHash][1]
+        return self.weights[selectedChildHash][2]
 
     def randomWalk(self):
         # if terminal game return the difference in scores
@@ -161,23 +164,23 @@ class MCSTSolver():
         max_ucb = -float('inf')
         max_i = 0
         c = 1
-        for i, childHash in enumerate(self.weights[str(self.hashes[0])][2]):
-            if self.weights[str(childHash)][0] == 0:
+        for i, childHash in enumerate(self.weights[str(self.hashes[0])][3]):
+            if self.weights[str(childHash)][1] == 0:
                 # return the index
                 return i
             # if a transposition table hit occurs then continue since others should have no visits
-            if self.weights[str(self.hashes[0])][0] <= 0 and self.weights[str(childHash)][0] != 0:
+            if self.weights[str(self.hashes[0])][1] <= 0 and self.weights[str(childHash)][1] != 0:
                 continue
-            assert self.weights[str(self.hashes[0])][0] > 0, f"log of 0 does not exist, {self.weights[str(self.hashes[0])]}, child: {self.weights[str(childHash)]}"
-            ucb_i = -self.weights[str(childHash)][1]/self.weights[str(childHash)][0]+c*math.sqrt(math.log(self.weights[str(self.hashes[0])][0])/self.weights[str(childHash)][0])
+            assert self.weights[str(self.hashes[0])][1] > 0, f"log of 0 does not exist, {self.weights[str(self.hashes[0])]}, child: {self.weights[str(childHash)]}"
+            ucb_i = -self.weights[str(childHash)][2]/self.weights[str(childHash)][1]+c*math.sqrt(math.log(self.weights[str(self.hashes[0])][1])/self.weights[str(childHash)][1])
             if ucb_i > max_ucb:
                 max_ucb = ucb_i
                 max_i = i
 
         # if all its children have visits from other paths but it itself does not have visits then set its visits to 1
         if max_ucb == -float('inf'):
-            for i, childHash in enumerate(self.weights[str(self.hashes[0])][2]):
-                ucb_i = -self.weights[str(childHash)][1]/self.weights[str(childHash)][0]+c*math.sqrt(math.log(1)/self.weights[str(childHash)][0])
+            for i, childHash in enumerate(self.weights[str(self.hashes[0])][3]):
+                ucb_i = -self.weights[str(childHash)][2]/self.weights[str(childHash)][1]+c*math.sqrt(math.log(1)/self.weights[str(childHash)][1])
                 if ucb_i > max_ucb:
                     max_ucb = ucb_i
                     max_i = i
