@@ -49,8 +49,8 @@ class MCSTPlayer(Player):
                 mostVisits = self.weights[str(childHash)][0]
         
         self.myMove += 1
-        # how can I have a child that is in the childHashes but not in the ChildMoves
         print("MCSTMove", self.myMove)
+        # how can I have a child that is in the childHashes but not in the ChildMoves
         bestMove = self.weights[str(curBoardHash)][2][bestI][1]
         self._game.playMove(bestMove[0], bestMove[1])
         return bestMove
