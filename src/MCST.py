@@ -1,4 +1,4 @@
-from Players.mcstPlayer import MCSTSolver
+from Players.mcstSolver import MCSTSolver
 from game import Game
 
 if __name__ == "__main__":

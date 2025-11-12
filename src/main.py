@@ -33,7 +33,7 @@ if __name__ == "__main__":
 
 
 
-    sim = Simulation((rows, cols, cutoff, handicap), mcstPlayer, randPlayer, 5000, (False, True, False, False, 0, 5000))
+    sim = Simulation((rows, cols, cutoff, handicap), mcstPlayer, randPlayer, 5000, (False, True, False, False, 1, 5000))
     sim.run()
 
     # test = TestRun((rows, cols, cutoff, handicap), friendlyPlayer, cluPlayer, 5000, (False, True, True, False, 0, 1000))
