@@ -384,7 +384,7 @@ def train_agent(num_episodes=10000, num_rows=7, num_cols=7, score_cutoff=0, hand
     """Train the DQN agent via self-play."""
     env = LineGameEnvironment(num_rows, num_cols, score_cutoff, handicap)
     agent = DQNAgent(num_rows, num_cols)
-    # agent.load_checkpoint('dqn_checkpoint_final.pth')
+    agent.load_checkpoint('dqn_checkpoint_final.pth')
     
     episode_results = []
     losses = []
@@ -451,7 +451,7 @@ if __name__ == "__main__":
     
     # Train the agent
     agent, results = train_agent(
-        num_episodes=500, 
+        num_episodes=1000, 
         num_rows=NUM_ROWS,
         num_cols=NUM_COLS,
         score_cutoff=SCORE_CUTOFF,
