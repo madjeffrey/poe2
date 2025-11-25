@@ -4,35 +4,38 @@ import torch.nn as nn
 import torch.optim as optim
 from collections import deque
 import random
-from game import Game
+import sys
+import os
+
+# Add parent directory to path to import game module
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+from src.game import Game
 
 class LineGameEnvironment:
-    """
-    Two-player 7x7 board game where:
-    - Player 1 places 1s
-    - Player 2 places 2s
-    - Lines of length n score 2^(n-1) points
-    """
+    """Wrapper for the Game class to work with DQN training."""
     
-    def __init__(self):
-        self.board_size = 7
+    def __init__(self, num_rows=7, num_cols=7, score_cutoff=0, handicap=5.5):
+        self.num_rows = num_rows
+        self.num_cols = num_cols
+        self.score_cutoff = score_cutoff
+        self.handicap = handicap
+        self.game = None
         self.reset()
     
     def reset(self):
-        """Reset the board to empty state."""
-        self.board = np.zeros((self.board_size, self.board_size), dtype=np.int32)
-        self.current_player = 1  # Player 1 starts
-        self.scores = {1: 0, 2: 0}  # Track cumulative scores
-        return self.board.copy(), self.current_player
+        """Reset the game to initial state."""
+        self.game = Game(self.num_rows, self.num_cols, self.score_cutoff, self.handicap)
+        board = self._convert_board_to_numpy(self.game.getBoard())
+        current_player = self.game.getCurrentPlayer()
+        return board, current_player
+    
+    def _convert_board_to_numpy(self, board):
+        """Convert the game's board to numpy array."""
+        return np.array(board, dtype=np.int32)
     
     def get_valid_actions(self):
         """Return list of valid (row, col) tuples for empty cells."""
-        actions = []
-        for i in range(self.board_size):
-            for j in range(self.board_size):
-                if self.board[i, j] == 0:
-                    actions.append((i, j))
-        return actions
+        return self.game.getPossibleMoves()
     
     def step(self, action):
         """
@@ -48,108 +51,60 @@ class LineGameEnvironment:
             info: Dictionary with additional info
         """
         row, col = action
+        current_player = self.game.getCurrentPlayer()
         
-        if self.board[row, col] != 0:
-            # Invalid move - penalize current player
-            return self.board.copy(), -100, True, {'invalid_move': True}
+        # Get scores before move
+        p1_before, p2_before = self.game.getPlayerScores()
         
-        # Place the tile for current player
-        value = self.current_player
-        self.board[row, col] = value
+        # Make the move
+        result = self.game.playMove(row, col)
         
-        # Calculate score for this move
-        move_score = self._calculate_line_score(row, col, value)
-        self.scores[self.current_player] += move_score
+        if result == -1:
+            # Invalid move - this shouldn't happen if we only select valid actions
+            return self._convert_board_to_numpy(self.game.getBoard()), -1, True, {'invalid_move': True}
         
-        # Reward is the score gained from this move
-        reward = move_score
+        # Get scores after move
+        p1_after, p2_after = self.game.getPlayerScores()
         
-        # Small penalty for not scoring to encourage efficient play
-        if move_score == 0:
-            reward = -0.1
+        # Calculate move score for info
+        if current_player == 1:
+            move_score = p1_after - p1_before
+        else:
+            move_score = p2_after - p2_before
         
-        # Check if game is done (board full)
-        done = not np.any(self.board == 0)
+        # All moves have 0 reward by default
+        reward = 0
         
-        # Add final game outcome to reward if done
+        # Check if game is done
+        winner = self.game.getWinner()
+        done = (winner != 0)
+        
+        # Only assign reward at end of game: +1 for win, -1 for loss
         if done:
-            score_diff = self.scores[self.current_player] - self.scores[3 - self.current_player]
-            if score_diff > 0:
-                reward += 50  # Win bonus
-            elif score_diff < 0:
-                reward -= 50  # Loss penalty
-            # Tie gives no additional reward
+            if winner == current_player:
+                reward = 1  # Win
+            else:
+                reward = -1  # Loss
         
         info = {
-            'scores': self.scores.copy(),
+            'scores': self.game.getPlayerScores(),
             'move_score': move_score,
-            'player': self.current_player
+            'player': current_player,
+            'winner': winner
         }
         
-        # Switch players
-        self.current_player = 3 - self.current_player
+        # Get next state
+        next_state = self._convert_board_to_numpy(self.game.getBoard())
         
-        return self.board.copy(), reward, done, info
-    
-    def _calculate_line_score(self, row, col, value):
-        """Calculate score for lines passing through the placed tile."""
-        total_score = 0
-        
-        # Check horizontal line
-        total_score += self._score_line_at(row, col, value, 0, 1)
-        
-        # Check vertical line
-        total_score += self._score_line_at(row, col, value, 1, 0)
-        
-        # Check diagonal (top-left to bottom-right)
-        total_score += self._score_line_at(row, col, value, 1, 1)
-        
-        # Check anti-diagonal (top-right to bottom-left)
-        total_score += self._score_line_at(row, col, value, 1, -1)
-        
-        return total_score
-    
-    def _score_line_at(self, row, col, value, dr, dc):
-        """
-        Score a line in direction (dr, dc) passing through (row, col).
-        Returns 2^(n-1) where n is the length of consecutive matching tiles.
-        """
-        # Count consecutive tiles in negative direction
-        count_neg = 0
-        r, c = row - dr, col - dc
-        while 0 <= r < self.board_size and 0 <= c < self.board_size:
-            if self.board[r, c] == value:
-                count_neg += 1
-                r -= dr
-                c -= dc
-            else:
-                break
-        
-        # Count consecutive tiles in positive direction
-        count_pos = 0
-        r, c = row + dr, col + dc
-        while 0 <= r < self.board_size and 0 <= c < self.board_size:
-            if self.board[r, c] == value:
-                count_pos += 1
-                r += dr
-                c += dc
-            else:
-                break
-        
-        # Total line length includes the placed tile
-        line_length = count_neg + 1 + count_pos
-        
-        # Score is 2^(n-1) for line of length n
-        if line_length >= 2:
-            return 2 ** (line_length - 1)
-        return 0
+        return next_state, reward, done, info
 
 
 class BoardEncoder:
     """Encode board state from current player's perspective."""
     
-    def __init__(self):
-        self.board_size = 7
+    def __init__(self, num_rows=7, num_cols=7):
+        self.board_size_rows = num_rows
+        self.board_size_cols = num_cols
         self.num_channels = 3  # [empty, my_tiles, opponent_tiles]
     
     def encode(self, board, current_player):
@@ -157,16 +112,16 @@ class BoardEncoder:
         Convert board to one-hot encoded features from current player's perspective.
         
         Args:
-            board: numpy array of shape (7, 7) with values {0, 1, 2}
+            board: numpy array of shape (rows, cols) with values {0, 1, 2}
             current_player: 1 or 2
             
         Returns:
-            features: numpy array of shape (7, 7, 3)
+            features: numpy array of shape (rows, cols, 3)
                 Channel 0: Empty cells
                 Channel 1: Current player's tiles
                 Channel 2: Opponent's tiles
         """
-        features = np.zeros((self.board_size, self.board_size, 3), dtype=np.float32)
+        features = np.zeros((self.board_size_rows, self.board_size_cols, 3), dtype=np.float32)
         
         opponent = 3 - current_player
         
@@ -178,10 +133,13 @@ class BoardEncoder:
 
 
 class DQN(nn.Module):
-    """Deep Q-Network for 7x7 line game."""
+    """Deep Q-Network for the line game."""
     
-    def __init__(self, input_channels=3):
+    def __init__(self, num_rows=7, num_cols=7, input_channels=3):
         super().__init__()
+        
+        self.num_rows = num_rows
+        self.num_cols = num_cols
         
         # Convolutional layers to extract spatial features
         self.conv = nn.Sequential(
@@ -194,23 +152,25 @@ class DQN(nn.Module):
         )
         
         # Fully connected layers
+        # After conv: rows*cols*128
+        conv_output_size = num_rows * num_cols * 128
         self.fc = nn.Sequential(
             nn.Flatten(),
-            nn.Linear(7 * 7 * 128, 512),
+            nn.Linear(conv_output_size, 512),
             nn.ReLU(),
             nn.Dropout(0.2),
             nn.Linear(512, 256),
             nn.ReLU(),
             nn.Dropout(0.2),
-            nn.Linear(256, 7 * 7)  # 49 actions (one per cell)
+            nn.Linear(256, num_rows * num_cols)  # One action per cell
         )
     
     def forward(self, x):
         """
         Args:
-            x: Board state tensor of shape (batch, 7, 7, 3)
+            x: Board state tensor of shape (batch, rows, cols, 3)
         Returns:
-            Q-values: Tensor of shape (batch, 49)
+            Q-values: Tensor of shape (batch, rows*cols)
         """
         # Convert from (batch, H, W, C) to (batch, C, H, W)
         if x.dim() == 4 and x.shape[-1] == 3:
@@ -224,18 +184,21 @@ class DQN(nn.Module):
 class DQNAgent:
     """DQN agent that learns to play for either player."""
     
-    def __init__(self, learning_rate=0.0001, gamma=0.95, epsilon=1.0, 
-                 epsilon_decay=0.999995, epsilon_min=0.05):
+    def __init__(self, num_rows=7, num_cols=7, learning_rate=0.0001, gamma=0.95, epsilon=1.0, 
+                 epsilon_decay=0.9995, epsilon_min=0.05):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         
-        self.q_network = DQN().to(self.device)
-        self.target_network = DQN().to(self.device)
+        self.num_rows = num_rows
+        self.num_cols = num_cols
+        
+        self.q_network = DQN(num_rows, num_cols).to(self.device)
+        self.target_network = DQN(num_rows, num_cols).to(self.device)
         self.target_network.load_state_dict(self.q_network.state_dict())
         
         self.optimizer = optim.Adam(self.q_network.parameters(), lr=learning_rate)
         self.loss_fn = nn.SmoothL1Loss()  # Huber loss - more stable than MSE
         
-        self.encoder = BoardEncoder()
+        self.encoder = BoardEncoder(num_rows, num_cols)
         self.memory = deque(maxlen=50000)  # Larger replay buffer
         
         self.gamma = gamma
@@ -248,12 +211,12 @@ class DQNAgent:
     def action_to_index(self, action):
         """Convert (row, col) to flat action index."""
         row, col = action
-        return row * 7 + col
+        return row * self.num_cols + col
     
     def index_to_action(self, index):
         """Convert flat action index to (row, col)."""
-        row = index // 7
-        col = index % 7
+        row = index // self.num_cols
+        col = index % self.num_cols
         return (row, col)
     
     def select_action(self, state, current_player, valid_actions, epsilon=None):
@@ -294,8 +257,8 @@ class DQNAgent:
         batch = random.sample(self.memory, self.batch_size)
         
         # Pre-allocate numpy arrays for efficiency
-        states_np = np.zeros((self.batch_size, 7, 7, 3), dtype=np.float32)
-        next_states_np = np.zeros((self.batch_size, 7, 7, 3), dtype=np.float32)
+        states_np = np.zeros((self.batch_size, self.num_rows, self.num_cols, 3), dtype=np.float32)
+        next_states_np = np.zeros((self.batch_size, self.num_rows, self.num_cols, 3), dtype=np.float32)
         actions_np = np.zeros(self.batch_size, dtype=np.int64)
         rewards_np = np.zeros(self.batch_size, dtype=np.float32)
         dones_np = np.zeros(self.batch_size, dtype=np.float32)
@@ -343,50 +306,85 @@ class DQNAgent:
     def decay_epsilon(self):
         """Decay exploration rate."""
         self.epsilon = max(self.epsilon_min, self.epsilon * self.epsilon_decay)
+    
+    def save_checkpoint(self, filepath='dqn_checkpoint.pth'):
+        """
+        Save model weights and training state.
+        
+        Args:
+            filepath: Path to save the checkpoint
+        """
+        checkpoint = {
+            'q_network_state_dict': self.q_network.state_dict(),
+            'target_network_state_dict': self.target_network.state_dict(),
+            'optimizer_state_dict': self.optimizer.state_dict(),
+            'epsilon': self.epsilon,
+            'gamma': self.gamma,
+            'epsilon_decay': self.epsilon_decay,
+            'epsilon_min': self.epsilon_min
+        }
+        torch.save(checkpoint, filepath)
+        print(f"Checkpoint saved to {filepath}")
+    
+    def load_checkpoint(self, filepath='dqn_checkpoint.pth'):
+        """
+        Load model weights and training state.
+        
+        Args:
+            filepath: Path to load the checkpoint from
+        """
+        checkpoint = torch.load(filepath, map_location=self.device)
+        
+        self.q_network.load_state_dict(checkpoint['q_network_state_dict'])
+        self.target_network.load_state_dict(checkpoint['target_network_state_dict'])
+        self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+        self.epsilon = checkpoint['epsilon']
+        self.gamma = checkpoint['gamma']
+        self.epsilon_decay = checkpoint['epsilon_decay']
+        self.epsilon_min = checkpoint['epsilon_min']
+        
+        print(f"Checkpoint loaded from {filepath}")
+        print(f"Resumed with epsilon={self.epsilon:.3f}")
 
 
 def play_self_play_episode(env, agent, train=True):
     """Play one episode of self-play."""
-    state, current_player = env.getBoard(), env.getCurrentPlayer()
+    state, current_player = env.reset()
     episode_data = []
     done = False
     
     while not done:
-        valid_actions = env.getPossibleMoves()
+        valid_actions = env.get_valid_actions()
         if not valid_actions:
             break
         
         # Agent selects action
         action = agent.select_action(state, current_player, valid_actions)
-        env.playMove(action[0], action[1])
-        next_state = env.getBoard()
-        done = env.gameOver()
-        reward = 0
-        if done:
-            reward = 1 if env.getWinner() == env.getCurrentPlayer() else -1
+        next_state, reward, done, info = env.step(action)
         
         # Store transition
-        next_player = env.getCurrentPlayer
+        next_player = env.game.getCurrentPlayer()
         episode_data.append((state.copy(), current_player, action, reward, 
                            next_state.copy(), next_player, done))
         
         state = next_state
         current_player = next_player
     
-    # Add transitions to memory with proper rewards
-    # The last player got their final reward, previous moves need adjustment
+    # Add transitions to memory
     if train:
         for i, (s, p, a, r, ns, np, d) in enumerate(episode_data):
             agent.store_transition(s, p, a, r, ns, np, d)
-    score = env.getPlayerScores()
-    scores = {1:score[0], 2: score[1]}
-    return scores, episode_data
+    
+    scores = env.game.getPlayerScores()
+    return {1: scores[0], 2: scores[1]}, episode_data
 
 
-def train_agent(num_episodes=1000, verbose=True):
+def train_agent(num_episodes=10000, num_rows=7, num_cols=7, score_cutoff=0, handicap=5.5,
+                verbose=True, save_every=1000, checkpoint_path='dqn_checkpoint.pth'):
     """Train the DQN agent via self-play."""
-    env = Game(7,7,0,5.5)
-    agent = DQNAgent()
+    env = LineGameEnvironment(num_rows, num_cols, score_cutoff, handicap)
+    agent = DQNAgent(num_rows, num_cols)
+    # agent.load_checkpoint('dqn_checkpoint_final.pth')
     
     episode_results = []
     losses = []
@@ -413,6 +411,10 @@ def train_agent(num_episodes=1000, verbose=True):
         if episode % 5 == 0 and episode > 0:
             agent.update_target_network()
         
+        # Save checkpoint periodically
+        if episode > 0 and episode % save_every == 0:
+            agent.save_checkpoint(checkpoint_path)
+        
         if verbose and episode % 100 == 0:
             recent = episode_results[-100:] if episode >= 100 else episode_results
             avg_p1 = np.mean([s[1] for s in recent])
@@ -423,17 +425,40 @@ def train_agent(num_episodes=1000, verbose=True):
             print(f"  Epsilon: {agent.epsilon:.3f}, Avg Loss: {recent_loss:.4f}")
             print(f"  Memory size: {len(agent.memory)}")
     
+    # Save final checkpoint
+    agent.save_checkpoint(checkpoint_path.replace('.pth', '_final.pth'))
+    
     return agent, episode_results
 
 
 if __name__ == "__main__":
-    print("Training DQN agent on 7x7 turn-based line game...")
+    print("Training DQN agent on turn-based line game...")
+    print("Using the Game class from src/game.py")
     print("Player 1 places 1s, Player 2 places 2s")
     print("Scoring: Lines of length n score 2^(n-1) points")
     print()
     
+    # Configure game parameters
+    NUM_ROWS = 7
+    NUM_COLS = 7
+    SCORE_CUTOFF = 0  # 0 means play until board is full
+    HANDICAP = 5.5
+    
+    print(f"Board size: {NUM_ROWS}x{NUM_COLS}")
+    print(f"Score cutoff: {SCORE_CUTOFF if SCORE_CUTOFF > 0 else 'None (play to fill board)'}")
+    print(f"Handicap: {HANDICAP}")
+    print()
+    
     # Train the agent
-    agent, results = train_agent(num_episodes=500, verbose=True)
+    agent, results = train_agent(
+        num_episodes=500, 
+        num_rows=NUM_ROWS,
+        num_cols=NUM_COLS,
+        score_cutoff=SCORE_CUTOFF,
+        handicap=HANDICAP,
+        verbose=True, 
+        save_every=100
+    )
     
     print("\nTraining complete!")
     print(f"Final epsilon: {agent.epsilon:.3f}")
@@ -449,3 +474,9 @@ if __name__ == "__main__":
     print(f"  Player 1 wins: {sum(1 for s in final_results if s[1] > s[2])}")
     print(f"  Player 2 wins: {sum(1 for s in final_results if s[2] > s[1])}")
     print(f"  Ties: {sum(1 for s in final_results if s[1] == s[2])}")
+    
+    print("\n" + "="*50)
+    print("To load the trained model later:")
+    print(f"  agent = DQNAgent(num_rows={NUM_ROWS}, num_cols={NUM_COLS})")
+    print("  agent.load_checkpoint('dqn_checkpoint_final.pth')")
+    print("="*50)
