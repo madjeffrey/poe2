@@ -451,7 +451,7 @@ if __name__ == "__main__":
     
     # Train the agent
     agent, results = train_agent(
-        num_episodes=1000, 
+        num_episodes=50000, 
         num_rows=NUM_ROWS,
         num_cols=NUM_COLS,
         score_cutoff=SCORE_CUTOFF,
